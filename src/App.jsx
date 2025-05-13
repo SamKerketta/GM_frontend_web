@@ -8,6 +8,7 @@ import "flowbite";
 import Login from "./pages/Login";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import PrivateRoute from "./components/PrivateRoutes";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -17,7 +18,14 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Layout />}>
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Layout />
+              </PrivateRoute>
+            }
+          >
             <Route index element={<Home />} />
           </Route>
         </Routes>
