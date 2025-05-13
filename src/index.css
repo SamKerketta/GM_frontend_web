@@ -3,9 +3,12 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+.mylogo {
+  width: 30%;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-.mylogo{
-    width: 30%;
-    margin-left: auto;
-    margin-right: auto;
+.bg-menu {
+  background-color: #1b56fd;
 }
