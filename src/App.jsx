@@ -5,15 +5,24 @@ import './App.css'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import 'flowbite';
+import Login from './pages/Login'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <Layout>
-        <Home />
-      </Layout>
+      <Router>
+        <Routes>
+          <Route path='/login' element={<Login />} />
+          <Route path='/' element={<Layout />} >
+            <Route index element={<Home />} />
+          </Route>
+        </Routes>
+      </Router>
+
+
     </>
   )
 }
