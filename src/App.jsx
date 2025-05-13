@@ -19,14 +19,13 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
-            path="/"
             element={
               <PrivateRoute>
                 <Layout />
               </PrivateRoute>
             }
           >
-            <Route index element={<Home />} />
+            <Route path="/" element={<Home />} />
           </Route>
         </Routes>
       </Router>
