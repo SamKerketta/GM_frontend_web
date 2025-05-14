@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import PrivateRoute from "./components/PrivateRoutes";
+import Members from "./pages/Members";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -26,6 +27,7 @@ function App() {
             }
           >
             <Route path="/" element={<Home />} />
+            <Route path="/members" element={<Members />} />
           </Route>
         </Routes>
       </Router>

@@ -5,13 +5,13 @@ import { Outlet } from "react-router-dom";
 
 const Layout = ({ children }) => {
   return (
-    <div>
+    <>
       <Sidebar />
       <Navbar />
-      <main className="ml-64 mt-16 p-6">
+      <main className="mt-15 ml-[250px]">
         <Outlet />
       </main>
-    </div>
+    </>
   );
 };
 
