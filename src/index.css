@@ -12,3 +12,7 @@
 .bg-menu {
   background-color: #1b56fd;
 }
+
+.sidebar-text:hover {
+  color: black !important;
+}
