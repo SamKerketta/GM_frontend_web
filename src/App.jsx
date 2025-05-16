@@ -12,8 +12,6 @@ import PrivateRoute from "./components/PrivateRoutes";
 import Members from "./pages/Members";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
       <Router>

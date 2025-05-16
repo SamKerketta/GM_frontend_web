@@ -1,10 +1,61 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "flowbite-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { faCreditCard } from "@fortawesome/free-solid-svg-icons";
+import { API_BASE_URL } from "../config/utilities";
+import axios from "axios";
+import ErrorToast from "../components/ErrorToast";
+import SuccessToast from "../components/SuccessToast";
+
+// Members api 
+const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
 
 const Members = () => {
+
+  const [membersList, setMembersList] = useState([])
+  const [loader, setLoader] = useState(false)
+  const [totalRows, setTotalRows] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // use Effect
+  useEffect(() => {
+    fetchMembers(currentPage);
+  }, [])
+
+  // Function to handle page changes
+  const handlePageChange = (page) => {
+    fetchMembers(page);
+  };
+
+  // Function to get all the members
+  const fetchMembers = (page) => {
+    setLoader(true)
+    try {
+      axios.post(`${memberListApi}`, {
+        page: page
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            const apiData = response.data;
+            if (apiData.status === true) {
+              setTotalRows(apiData.total);              // total number of records
+              setCurrentPage(apiData.current_page);     // update current page
+              setMembersList(apiData.data.data)
+              console.log(membersList)
+            }
+          } else {
+            ErrorToast.show(response.data.message)
+          }
+        })
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoader(false)
+    }
+
+  }
+
   const columns = [
     {
       name: "ID",
@@ -17,13 +68,23 @@ const Members = () => {
       sortable: true,
     },
     {
+      name: "Member Contact",
+      selector: (row) => row.phone,
+      sortable: true,
+    },
+    {
+      name: "Member Gender",
+      selector: (row) => row.gender,
+      sortable: true,
+    },
+    {
       name: "Date Of Joining",
-      selector: (row) => row.dateOfJoining,
+      selector: (row) => row.membership_start,
       sortable: true,
     },
     {
       name: "Due Date",
-      selector: (row) => row.dueDate,
+      selector: (row) => row.membership_end,
       sortable: true,
     },
     {
@@ -58,28 +119,21 @@ const Members = () => {
     },
   ];
 
-  const data = [
-    {
-      id: 1,
-      name: "Beetlejuice",
-      dateOfJoining: "1988",
-      dueDate: "15-05-2025",
-    },
-    {
-      id: 2,
-      name: "Ghostbusters",
-      dateOfJoining: "1984",
-      dueDate: "16-05-2025",
-    },
-  ];
-
   return (
     <>
       <h2 class="mb-4 text-3xl font-semibold leading-none tracking-tight text-gray-900 md:text-2xl dark:text-white text-center">
         Members List
       </h2>
 
-      <DataTable fixedHeader columns={columns} data={data} pagination />
+      <DataTable fixedHeader
+        columns={columns}
+        data={membersList}
+        pagination
+        paginationServer
+        paginationTotalRows={totalRows}
+        onChangePage={handlePageChange}
+        progressPending={loader}
+      />
     </>
   );
 };
