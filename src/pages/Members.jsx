@@ -2,11 +2,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-import { faCreditCard } from "@fortawesome/free-solid-svg-icons";
+import { faCreditCard, faUser } from "@fortawesome/free-solid-svg-icons";
 import { API_BASE_URL } from "../config/utilities";
 import axios from "axios";
 import ErrorToast from "../components/ErrorToast";
-import SuccessToast from "../components/SuccessToast";
+import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
+import AddMember from "../assets/forms/AddMember";
 
 // Members api 
 const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
@@ -17,6 +18,7 @@ const Members = () => {
   const [loader, setLoader] = useState(false)
   const [totalRows, setTotalRows] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   // use Effect
   useEffect(() => {
@@ -28,21 +30,27 @@ const Members = () => {
     fetchMembers(page);
   };
 
+  // Handle per page row changes
+  const handlePerRowsChange = (newPerPage, page) => {
+    setPerPage(newPerPage);
+    fetchMembers(page, newPerPage);
+  };
+
   // Function to get all the members
-  const fetchMembers = (page) => {
+  const fetchMembers = (page, perPageSize = perPage) => {
     setLoader(true)
     try {
       axios.post(`${memberListApi}`, {
-        page: page
+        page: page,
+        perPage: perPageSize
       })
         .then((response) => {
           if (response.status === 200) {
             const apiData = response.data;
             if (apiData.status === true) {
-              setTotalRows(apiData.total);              // total number of records
-              setCurrentPage(apiData.current_page);     // update current page
+              setTotalRows(apiData.data.total);              // total number of records
+              setCurrentPage(apiData.data.current_page);     // update current page
               setMembersList(apiData.data.data)
-              console.log(membersList)
             }
           } else {
             ErrorToast.show(response.data.message)
@@ -58,28 +66,62 @@ const Members = () => {
 
   const columns = [
     {
-      name: "ID",
-      selector: (row) => row.id,
+      name: "#",
+      selector: (row, index) => index + 1,
       sortable: true,
     },
     {
-      name: "Member Name",
+      name: "Member's Name",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      name: "Member Contact",
+      name: "Member's Contact",
       selector: (row) => row.phone,
       sortable: true,
     },
     {
-      name: "Member Gender",
+      name: "Gender",
       selector: (row) => row.gender,
       sortable: true,
     },
     {
       name: "Date Of Joining",
       selector: (row) => row.membership_start,
+      sortable: true,
+    },
+    {
+      name: "Dues Status",
+      cell: (row, index) => (
+        <>
+          {row.due_status !== 0 ? (
+            <span className="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
+              Dues
+            </span>
+          ) : (
+            <span className="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
+              No Dues
+            </span>
+          )}
+        </>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Due Months",
+      cell: (row, index) => (
+        <>
+          {row.months_due > 0 ? (
+            <span className="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
+              {row.months_due}
+            </span>
+          ) : (
+            <span className="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
+              0
+            </span>
+          )}
+        </>
+      ),
       sortable: true,
     },
     {
@@ -90,20 +132,15 @@ const Members = () => {
     {
       name: "Action",
       button: true,
-      cell: () => (
+      cell: (row) => (
         <div className="flex gap-1 m-2">
           {/* Info Button */}
           <Button
             type="button"
             className="px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-full hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"
           >
-            <svg
-              className="w-4 h-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M15.133 10.632v-1.8a5.407 5.407 0 0 0-4.154-5.262.955.955 0 0 0 .021-.106V1.1a1 1 0 0 0-2 0v2.364a.944.944 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C4.867 13.018 3 13.614 3 14.807 3 15.4 3 16 3.538 16h12.924C17 16 17 15.4 17 14.807c0-1.193-1.867-1.789-1.867-4.175Z" />
+            <svg class="w-6 h-6 text-white dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 21">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 3.464V1.1m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175C17 15.4 17 16 16.462 16H3.538C3 16 3 15.4 3 14.807c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 10 3.464ZM1.866 8.832a8.458 8.458 0 0 1 2.252-5.714m14.016 5.714a8.458 8.458 0 0 0-2.252-5.714M6.54 16a3.48 3.48 0 0 0 6.92 0H6.54Z"></path>
             </svg>
           </Button>
 
@@ -121,19 +158,39 @@ const Members = () => {
 
   return (
     <>
-      <h2 class="mb-4 text-3xl font-semibold leading-none tracking-tight text-gray-900 md:text-2xl dark:text-white text-center">
-        Members List
-      </h2>
+      <div class="grid grid-cols-12 gap-4 p-2">
+        <div className="col-span-6">
+          <h2 class="mb-4 text-3xl font-semibold leading-none tracking-tight text-gray-900 md:text-2xl dark:text-white float-right">
+            <FontAwesomeIcon icon={faUsers} /> Members List
+          </h2>
+        </div>
+        <div class="col-span-6">
+          <button
+            type="button"
+            class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right"
+            data-modal-target="member-modal" data-modal-toggle="member-modal"
+          >
+            <FontAwesomeIcon icon={faUser} /> Add Member
+          </button>
+        </div>
 
-      <DataTable fixedHeader
-        columns={columns}
-        data={membersList}
-        pagination
-        paginationServer
-        paginationTotalRows={totalRows}
-        onChangePage={handlePageChange}
-        progressPending={loader}
-      />
+        <div className="col-span-12">
+          <DataTable fixedHeader
+            columns={columns}
+            data={membersList}
+            pagination
+            paginationServer
+            paginationTotalRows={totalRows}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handlePerRowsChange}
+            paginationRowsPerPageOptions={[10, 20, 50]}
+            progressPending={loader}
+          />
+        </div>
+      </div>
+
+      <AddMember />
+
     </>
   );
 };
