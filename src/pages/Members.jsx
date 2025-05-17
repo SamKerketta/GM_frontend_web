@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button } from "flowbite-react";
+// import { Button } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { faCreditCard, faUser } from "@fortawesome/free-solid-svg-icons";
@@ -8,6 +8,7 @@ import axios from "axios";
 import ErrorToast from "../components/ErrorToast";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import AddMember from "../assets/forms/AddMember";
+import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
 
 // Members api 
 const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
@@ -19,6 +20,7 @@ const Members = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
+  const [openMemberModal, setOpenMemberModal] = useState(false);
 
   // use Effect
   useEffect(() => {
@@ -168,7 +170,7 @@ const Members = () => {
           <button
             type="button"
             class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right"
-            data-modal-target="member-modal" data-modal-toggle="member-modal"
+            onClick={() => setOpenMemberModal(true)}
           >
             <FontAwesomeIcon icon={faUser} /> Add Member
           </button>
@@ -189,7 +191,10 @@ const Members = () => {
         </div>
       </div>
 
-      <AddMember />
+      <AddMember
+        openMemberModal={openMemberModal}
+        setOpenMemberModal={setOpenMemberModal}
+      />
 
     </>
   );
