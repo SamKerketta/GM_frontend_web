@@ -49,8 +49,9 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
             startDate: Yup.date()
                 .required('Please Enter This Field'),
         }),
-        onSubmit: values => {
-            console.log(values)
+        onSubmit: (values, { resetForm }) => {
+            console.log(values);
+            resetForm();
         }
     });
 
@@ -62,7 +63,7 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
             const formattedlaterDate = laterDate.toISOString().split('T')[0];
             formik.setFieldValue('endDate', formattedlaterDate);
         }
-    }, [formik.values.startDate])
+    }, [formik.values.startDate, formik.values.planId])
 
     return (
         <>
