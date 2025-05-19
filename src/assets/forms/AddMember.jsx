@@ -223,7 +223,7 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
                                                 value={formik.values.planId}
                                                 onBlur={formik.handleBlur}>
                                                 <option value="">Select Plan</option>
-                                                <option value="Monthly">Monthly</option>
+                                                <option value="1">Monthly</option>
                                             </select>
                                             {formik.touched.planId && formik.errors.planId ?
                                                 <div className="mt-2 text-sm text-red-600 dark:text-red-500"><span className="font-medium">
