@@ -12,7 +12,6 @@ import SuccessToast from "../../components/SuccessToast";
 
 /**
  * Things to do
- * 1. integrate add members api
  * 2. Add Discount Columns (In enhancement)
  */
 

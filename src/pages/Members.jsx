@@ -8,7 +8,7 @@ import axios from "axios";
 import ErrorToast from "../components/ErrorToast";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import AddMember from "../assets/forms/AddMember";
-import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
+import { Button } from "flowbite-react";
 
 // Members api 
 const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
