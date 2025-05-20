@@ -5,10 +5,30 @@ import { Button, HelperText, Modal, ModalBody, ModalFooter, ModalHeader } from "
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';
-import { CURRENT_DATE } from "../../config/utilities";
+import { API_BASE_URL, CURRENT_DATE } from "../../config/utilities";
+import ErrorToast from "../../components/ErrorToast";
+import axios from "axios";
 
 const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
+    const planListApi = `${API_BASE_URL}/crud/plans/list`
     const currentDate = CURRENT_DATE;
+    const [plans, setPlans] = useState([]);
+
+    useEffect(() => {
+        axios.post(`${planListApi}`)
+            .then((response) => {
+                if (response.status === 200) {
+                    const apiData = response.data;
+                    if (apiData.status === true) {
+                        setPlans(apiData.data)
+                    }
+                } else {
+                    ErrorToast.show(response.data.message)
+                }
+            })
+    }, [])
+
+
     const formik = useFormik({
         initialValues: {
             name: '',
@@ -20,6 +40,12 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
             address: '',
             startDate: '',
             endDate: '',
+            isPayment: 0,
+            admissionFee: 0,
+            membershipFee: 0,
+            payableAmt: 0,
+            tac: true,
+            durationInMonths: 0,
 
         },
         validationSchema: Yup.object({
@@ -48,6 +74,8 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
                 .required('Please Enter This Field'),
             startDate: Yup.date()
                 .required('Please Enter This Field'),
+            tac: Yup.boolean()
+                .oneOf([true], 'You must agree with our terms and conditions'),
         }),
         onSubmit: (values, { resetForm }) => {
             console.log(values);
@@ -57,13 +85,26 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
 
     useEffect(() => {
         if (formik.values.startDate) {
-            const addMonths = 1;                            // Do here dynamication as per plan
+            const addMonths = formik.values.durationInMonths;                            // Do here dynamication as per plan
             const start = new Date(formik.values.startDate);
-            const laterDate = new Date(start.setMonth(start.getMonth() + addMonths));
+            const laterDate = new Date(start.setMonth(start.getMonth() + Number(addMonths)));
             const formattedlaterDate = laterDate.toISOString().split('T')[0];
             formik.setFieldValue('endDate', formattedlaterDate);
         }
     }, [formik.values.startDate, formik.values.planId])
+
+    // Payment Calculation
+    useEffect((() => {
+        if (formik.values.isPayment) {
+            const admissionFee = 200;
+            const membershipFeePerMonth = Number(formik.values.membershipFee);          // Vary as per Plan
+            const totalPayableAmt = admissionFee + membershipFeePerMonth;
+
+            formik.setFieldValue('admissionFee', admissionFee);
+            formik.setFieldValue('membershipFee', membershipFeePerMonth);
+            formik.setFieldValue('payableAmt', totalPayableAmt);
+        }
+    }), [formik.values.isPayment])
 
     return (
         <>
@@ -220,11 +261,28 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
                                                         ? 'bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white'
                                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'}
                                                     `}
-                                                onChange={formik.handleChange}
+                                                // onChange={formik.handleChange}
+                                                onChange={(e) => {
+                                                    const selectedOption = e.target.selectedOptions[0];
+                                                    const duration = selectedOption.getAttribute('data-duration');
+                                                    const price = selectedOption.getAttribute('data-price');
+
+                                                    formik.setFieldValue('planId', e.target.value);
+                                                    formik.setFieldValue('durationInMonths', duration);
+                                                    formik.setFieldValue('membershipFee', price);
+                                                }}
                                                 value={formik.values.planId}
                                                 onBlur={formik.handleBlur}>
                                                 <option value="">Select Plan</option>
-                                                <option value="1">Monthly</option>
+                                                {plans.map((plan) => (
+                                                    <option
+                                                        data-duration={plan.duration}
+                                                        data-price={plan.price}
+                                                        value={plan.id}>{plan.plan_name}
+                                                        <span class="text-sm text-gray-500">
+                                                            ({plan.duration} In Months)</span>
+                                                    </option>
+                                                ))}
                                             </select>
                                             {formik.touched.planId && formik.errors.planId ?
                                                 <div className="mt-2 text-sm text-red-600 dark:text-red-500"><span className="font-medium">
@@ -286,12 +344,87 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
                                                 value={formik.values.endDate}
                                                 readOnly />
                                         </div>
+                                        <div className="col-span-12">
+                                            <input id="isPayment" type="checkbox" defaultValue
+                                                className="mt-5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                onChange={formik.handleChange}
+                                                checked={formik.values.isPayment}
+                                            />
+                                            <label htmlFor="isPayment" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Do You Want to Pay ?</label>
+                                        </div>
+
+                                        {/* Payment Parameters */}
+                                        {formik.values.isPayment ? (
+                                            <div className="col-span-4">
+                                                <label htmlFor="admissionFee" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                    Admission Fee
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="admissionFee"
+                                                    id="admissionFee"
+                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                    value={formik.values.admissionFee}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        ) : null}
+
+                                        {formik.values.isPayment ? (
+                                            <div className="col-span-4">
+                                                <label htmlFor="membershipFee" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                    Membership Fee
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="membershipFee"
+                                                    id="membershipFee"
+                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                    value={formik.values.membershipFee}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        ) : null}
+
+                                        {formik.values.isPayment ? (
+                                            <div className="col-span-4">
+                                                <label htmlFor="payableAmt" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                    Payable Amount
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="payableAmt"
+                                                    id="payableAmt"
+                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                    value={formik.values.payableAmt}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        ) : null}
+                                        {/* Payment Parameters */}
+
+                                        <div className="col-span-12">
+                                            <input id="tac" type="checkbox" defaultValue
+                                                className="mt-5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                onChange={formik.handleChange}
+                                                checked={formik.values.tac}
+                                            />
+                                            <label htmlFor="tac" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                                                Agree <a className="text-blue-800" href="terms-and-conditions">Terms and Conditions</a>
+                                            </label>
+                                            {formik.touched.tac && formik.errors.tac ?
+                                                <div className="mt-2 text-sm text-red-600 dark:text-red-500"><span className="font-medium">
+                                                    {formik.errors.tac}
+                                                </span></div>
+                                                : null}
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
                         </ModalBody>
 
-                        <div class="grid grid-cols-12 gap-4">
+                        <div class="grid grid-cols-12 gap-4 bg-white">
                             <ModalFooter className="col-span-12">
                                 <Button type="submit"><FontAwesomeIcon icon={faUser} />  Save Member</Button>
                                 <Button color="gray" onClick={() => setOpenMemberModal(false)}>
