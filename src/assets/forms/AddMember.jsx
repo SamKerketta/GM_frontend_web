@@ -9,6 +9,12 @@ import { API_BASE_URL, CURRENT_DATE } from "../../config/utilities";
 import ErrorToast from "../../components/ErrorToast";
 import axios from "axios";
 
+/**
+ * Things to do
+ * 1. integrate add members api
+ * 2. Add Discount Columns (In enhancement)
+ */
+
 const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
     const planListApi = `${API_BASE_URL}/crud/plans/list`
     const currentDate = CURRENT_DATE;
