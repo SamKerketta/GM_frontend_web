@@ -104,7 +104,7 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
             formik.setFieldValue('membershipFee', membershipFeePerMonth);
             formik.setFieldValue('payableAmt', totalPayableAmt);
         }
-    }), [formik.values.isPayment])
+    }), [formik.values.isPayment, formik.values.planId])
 
     return (
         <>
