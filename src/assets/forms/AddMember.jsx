@@ -5,9 +5,10 @@ import { Button, HelperText, Modal, ModalBody, ModalFooter, ModalHeader } from "
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';
-import { API_BASE_URL, CURRENT_DATE } from "../../config/utilities";
+import { ADMITION_FEE, API_BASE_URL, CURRENT_DATE } from "../../config/utilities";
 import ErrorToast from "../../components/ErrorToast";
 import axios from "axios";
+import SuccessToast from "../../components/SuccessToast";
 
 /**
  * Things to do
@@ -15,8 +16,10 @@ import axios from "axios";
  * 2. Add Discount Columns (In enhancement)
  */
 
-const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
+const AddMember = ({ openMemberModal, setOpenMemberModal, setreloadMembers }) => {
     const planListApi = `${API_BASE_URL}/crud/plans/list`
+    const addMemberApi = `${API_BASE_URL}/crud/member/add-member`
+
     const currentDate = CURRENT_DATE;
     const [plans, setPlans] = useState([]);
 
@@ -44,7 +47,7 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
             gender: '',
             planId: '',
             address: '',
-            startDate: '',
+            membershipStart: currentDate,
             endDate: '',
             isPayment: 0,
             admissionFee: 0,
@@ -52,6 +55,7 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
             payableAmt: 0,
             tac: true,
             durationInMonths: 0,
+            isAdmitFee: 0,
 
         },
         validationSchema: Yup.object({
@@ -78,31 +82,52 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
             address: Yup.string()
                 .max(100, 'Must be 100 characters or less')
                 .required('Please Enter This Field'),
-            startDate: Yup.date()
+            membershipStart: Yup.date()
                 .required('Please Enter This Field'),
             tac: Yup.boolean()
                 .oneOf([true], 'You must agree with our terms and conditions'),
         }),
         onSubmit: (values, { resetForm }) => {
             console.log(values);
-            resetForm();
+            submitMember(values, resetForm)
         }
     });
 
+    // Submit Members api call
+    const submitMember = (payload, resetForm) => {
+        axios.post(`${addMemberApi}`, payload)
+            .then((response) => {
+                if (response.status === 200) {
+                    const apiData = response.data;
+                    if (apiData.status === true) {
+                        SuccessToast.show(apiData.message)
+                        setOpenMemberModal(false)
+                        setreloadMembers(true)
+                        resetForm();
+                    }
+                    if (apiData.status === false) {
+                        ErrorToast.show(apiData.message)
+                    }
+                } else {
+                    ErrorToast.show(response.data.message)
+                }
+            })
+    }
+
     useEffect(() => {
-        if (formik.values.startDate) {
+        if (formik.values.membershipStart) {
             const addMonths = formik.values.durationInMonths;                            // Do here dynamication as per plan
-            const start = new Date(formik.values.startDate);
+            const start = new Date(formik.values.membershipStart);
             const laterDate = new Date(start.setMonth(start.getMonth() + Number(addMonths)));
             const formattedlaterDate = laterDate.toISOString().split('T')[0];
             formik.setFieldValue('endDate', formattedlaterDate);
         }
-    }, [formik.values.startDate, formik.values.planId])
+    }, [formik.values.membershipStart, formik.values.planId])
 
     // Payment Calculation
     useEffect((() => {
         if (formik.values.isPayment) {
-            const admissionFee = 200;
+            const admissionFee = (formik.values.isAdmitFee == 1) ? ADMITION_FEE : 0;
             const membershipFeePerMonth = Number(formik.values.membershipFee);          // Vary as per Plan
             const totalPayableAmt = admissionFee + membershipFeePerMonth;
 
@@ -272,10 +297,12 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
                                                     const selectedOption = e.target.selectedOptions[0];
                                                     const duration = selectedOption.getAttribute('data-duration');
                                                     const price = selectedOption.getAttribute('data-price');
+                                                    const isAdmitFee = selectedOption.getAttribute('data-isadmitfee');
 
                                                     formik.setFieldValue('planId', e.target.value);
                                                     formik.setFieldValue('durationInMonths', duration);
                                                     formik.setFieldValue('membershipFee', price);
+                                                    formik.setFieldValue('isAdmitFee', isAdmitFee);
                                                 }}
                                                 value={formik.values.planId}
                                                 onBlur={formik.handleBlur}>
@@ -284,6 +311,7 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
                                                     <option
                                                         data-duration={plan.duration}
                                                         data-price={plan.price}
+                                                        data-isadmitfee={plan.is_admission_fee_required}
                                                         value={plan.id}>{plan.plan_name}
                                                         <span class="text-sm text-gray-500">
                                                             ({plan.duration} In Months)</span>
@@ -322,24 +350,24 @@ const AddMember = ({ openMemberModal, setOpenMemberModal }) => {
                                         </div>
 
                                         <div className="col-span-6">
-                                            <label htmlFor="startDate"
+                                            <label htmlFor="membershipStart"
                                                 className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.startDate && formik.errors.startDate
+                                                ${formik.touched.membershipStart && formik.errors.membershipStart
                                                         ? 'text-red-900'
                                                         : 'text-gray-900 dark:text-white'}
                                                     `}
                                             >Membership Starting Date</label>
-                                            <input type="date" name="startDate" id="startDate"
+                                            <input type="date" name="membershipStart" id="membershipStart"
                                                 className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.startDate && formik.errors.startDate
+                                                ${formik.touched.membershipStart && formik.errors.membershipStart
                                                         ? 'bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white'
                                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'}
                                                     `}
                                                 onChange={formik.handleChange}
-                                                value={formik.values.startDate} />
-                                            {formik.touched.startDate && formik.errors.startDate ?
+                                                value={formik.values.membershipStart} />
+                                            {formik.touched.membershipStart && formik.errors.membershipStart ?
                                                 <div className="mt-2 text-sm text-red-600 dark:text-red-500"><span className="font-medium">
-                                                    {formik.errors.startDate}
+                                                    {formik.errors.membershipStart}
                                                 </span></div>
                                                 : null}
                                         </div>

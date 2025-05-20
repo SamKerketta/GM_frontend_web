@@ -21,11 +21,12 @@ const Members = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [openMemberModal, setOpenMemberModal] = useState(false);
+  const [reloadMembers, setreloadMembers] = useState(false);
 
   // use Effect
   useEffect(() => {
     fetchMembers(currentPage);
-  }, [])
+  }, [reloadMembers])
 
   // Function to handle page changes
   const handlePageChange = (page) => {
@@ -194,6 +195,7 @@ const Members = () => {
       <AddMember
         openMemberModal={openMemberModal}
         setOpenMemberModal={setOpenMemberModal}
+        setreloadMembers={setreloadMembers}
       />
 
     </>
