@@ -1,7 +1,8 @@
 import React from "react";
-import { Link, Route } from "react-router-dom";
+import { Link, Route, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
+  const location = useLocation();
   const menues = [
     {
       menuId: 1,
@@ -20,7 +21,7 @@ const Sidebar = () => {
         {
           menuName: "Members",
           fontIcon: null,
-          menuRoute: "members",
+          menuRoute: "/members",
           isParent: false,
         },
       ],
@@ -61,13 +62,20 @@ const Sidebar = () => {
         <ul className="space-y-2">
           {/* For Simple Routes */}
           {menues.map((item) => {
+            var isActive = location.pathname === item.menuRoute;
+
             return (
               <React.Fragment key={item.menuId}>
                 {item.isParent === false ? (
                   <li>
                     <Link
                       to={item.menuRoute}
-                      className="flex items-center p-2 text-base font-normal text-white rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group sidebar-text"
+                      className={`flex items-center p-2 text-base font-normal rounded-lg group sidebar-text
+                ${
+                  isActive
+                    ? "bg-gray-100 text-black dark:bg-gray-700 dark:text-white"
+                    : "text-white dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
                     >
                       <svg
                         aria-hidden="true"
@@ -123,11 +131,17 @@ const Sidebar = () => {
                     <ul id="dropdown-pages" className="hidden py-2 space-y-2">
                       <li>
                         {item.child?.map((childItem) => {
+                          isActive = location.pathname === childItem.menuRoute;
                           return (
                             <>
                               <Link
                                 to={childItem.menuRoute}
-                                className="flex items-center p-2 pl-11 w-full text-base font-normal text-white rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 sidebar-text"
+                                className={`flex items-center p-2 pl-11 w-full text-base font-normal rounded-lg transition duration-75 group sidebar-text
+                  ${
+                    isActive
+                      ? "bg-gray-100 text-black dark:bg-gray-700 dark:text-white"
+                      : "text-white dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
                               >
                                 {childItem.menuName}
                               </Link>
