@@ -3,6 +3,7 @@ import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { useLocation } from "react-router-dom";
+import PageLoader from "../components/PageLoader";
 
 const PaymentForm = () => {
   const location = useLocation();
@@ -10,7 +11,7 @@ const PaymentForm = () => {
   return (
     <>
       <section className="bg-white py-8 antialiased dark:bg-gray-900 md:py-16">
-        <form action="#" className="mx-auto max-w-screen-xl px-4 2xl:px-0">
+        <form action="#" className="mx-auto px-5">
           <ol className="items-center flex w-full max-w-2xl text-center text-sm font-medium text-gray-500 dark:text-gray-400 sm:text-base">
             <li className="after:border-1 flex items-center text-primary-700 after:mx-6 after:hidden after:h-1 after:w-full after:border-b after:border-gray-200 dark:text-primary-500 dark:after:border-gray-700 sm:after:inline-block sm:after:content-[''] md:w-full xl:after:mx-10">
               <span className="flex items-center after:mx-2 after:text-gray-200 after:content-['/'] dark:after:text-gray-500 sm:after:hidden">
