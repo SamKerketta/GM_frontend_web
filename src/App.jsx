@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import PrivateRoute from "./components/PrivateRoutes";
 import Members from "./pages/Members";
+import PaymentForm from "./pages/PaymentForm";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           >
             <Route path="/" element={<Home />} />
             <Route path="/members" element={<Members />} />
+            <Route path="/member-payment" element={<PaymentForm />} />
           </Route>
         </Routes>
       </Router>
