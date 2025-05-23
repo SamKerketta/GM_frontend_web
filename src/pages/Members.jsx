@@ -10,6 +10,12 @@ import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import AddMember from "../assets/forms/AddMember";
 import { Button } from "flowbite-react";
 import { Link } from "react-router-dom";
+import SuccessToast from "../components/SuccessToast";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
+import { faBell } from "@fortawesome/free-solid-svg-icons/faBell";
+import { faCircleCheck } from "@fortawesome/free-solid-svg-icons/faCircleCheck";
+import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons/faMoneyCheckDollar";
 
 // Members api
 const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
@@ -29,6 +35,7 @@ const Members = () => {
   const [reloadMembers, setreloadMembers] = useState(false);
   const planListApi = `${API_BASE_URL}/crud/plans/list`;
   const [plans, setPlans] = useState([]);
+  const [notifiedId, setNotifiedId] = useState(null);
 
   useEffect(() => {
     axios.post(`${planListApi}`).then((response) => {
@@ -84,6 +91,30 @@ const Members = () => {
       console.error(error);
     } finally {
       setLoader(false);
+    }
+  };
+
+  // Send Whatsapp msg
+  const sendWhatsappMsg = async (memberId) => {
+    setNotifiedId(memberId);
+    try {
+      await axios
+        .post(`${API_BASE_URL}/send-whatsapp`, {
+          memberId: memberId,
+        })
+        .then((response) => {
+          if (response.data.status == false) {
+            ErrorToast.show(response.data.message);
+          }
+
+          if (response.data.status) {
+            SuccessToast.show(response.data.message);
+          }
+        });
+    } catch {
+      ErrorToast.show("Oops Something Went Wrong");
+    } finally {
+      // setNotifiedId(null);
     }
   };
 
@@ -161,22 +192,28 @@ const Members = () => {
           <Button
             type="button"
             className="px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-full hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"
+            disabled={notifiedId === row.id}
+            onClick={() => sendWhatsappMsg(row.id)}
           >
-            <svg
-              class="w-6 h-6 text-white dark:text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 21"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10 3.464V1.1m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175C17 15.4 17 16 16.462 16H3.538C3 16 3 15.4 3 14.807c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 10 3.464ZM1.866 8.832a8.458 8.458 0 0 1 2.252-5.714m14.016 5.714a8.458 8.458 0 0 0-2.252-5.714M6.54 16a3.48 3.48 0 0 0 6.92 0H6.54Z"
-              ></path>
-            </svg>
+            {notifiedId === row.id ? (
+              <FontAwesomeIcon icon={faCircleCheck} size="2x" />
+            ) : (
+              <svg
+                class="w-6 h-6 text-white dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 21"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 3.464V1.1m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175C17 15.4 17 16 16.462 16H3.538C3 16 3 15.4 3 14.807c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 10 3.464ZM1.866 8.832a8.458 8.458 0 0 1 2.252-5.714m14.016 5.714a8.458 8.458 0 0 0-2.252-5.714M6.54 16a3.48 3.48 0 0 0 6.92 0H6.54Z"
+                ></path>
+              </svg>
+            )}
           </Button>
 
           {/* Danger Button */}
@@ -188,9 +225,9 @@ const Members = () => {
             }}
             to="/member-payment"
             type="button"
-            className="px-3 py-2 text-xs font-medium text-white bg-red-600 rounded-full hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800 inline-flex items-center"
+            className="px-2 py-2 text-xs font-medium text-white bg-red-600 rounded-full hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800 inline-flex items-center"
           >
-            <FontAwesomeIcon icon={faCreditCard} />
+            <FontAwesomeIcon icon={faMoneyCheckDollar} size="2x" />
           </Link>
         </div>
       ),
