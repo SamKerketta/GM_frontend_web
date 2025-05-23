@@ -29,6 +29,10 @@ const Login = () => {
 
           if (response.data.status) {
             localStorage.setItem("authToken", response.data.data.token);
+            localStorage.setItem(
+              "userDetails",
+              JSON.stringify(response.data.data.userDetails)
+            );
             SuccessToast.show(response.data.message);
             setRedirect(true);
           }

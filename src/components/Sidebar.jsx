@@ -37,13 +37,6 @@ const Sidebar = () => {
       isParent: false,
     },
     {
-      menuId: 4,
-      menuName: "Logout",
-      fontIcon: null,
-      menuRoute: "logout",
-      isParent: false,
-    },
-    {
       menuId: 5,
       menuName: "Help",
       fontIcon: null,
