@@ -893,6 +893,7 @@ const PaymentForm = () => {
                                                     `}
                       placeholder=""
                       onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
                       value={formik.values.monthFrom}
                     />
 
