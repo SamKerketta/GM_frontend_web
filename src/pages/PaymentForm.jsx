@@ -1,19 +1,167 @@
 import { faCreditCard } from "@fortawesome/free-solid-svg-icons/faCreditCard";
 import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PageLoader from "../components/PageLoader";
+import axios from "axios";
+import { API_BASE_URL, CURRENT_DATE } from "../config/utilities";
+import ErrorToast from "../components/ErrorToast";
+import {
+  dmyToYmd,
+  getEndingDateByPlanId,
+  isNullOrEmpty,
+} from "../Services/Utils";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import SuccessToast from "../components/SuccessToast";
 
 const PaymentForm = () => {
   const location = useLocation();
   const plans = location.state.plans;
+  const memberId = location.state.memberId;
+  const [memberDtl, setMemberDtl] = useState([]);
+  const [loader, setLoader] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [arrear, setArrear] = useState(0);
+  const [tax, setTax] = useState(0);
+
+  const formik = useFormik({
+    enableReinitialize: true, // 🔥 This is the key
+    initialValues: {
+      name: memberDtl.name,
+      email: memberDtl.email,
+      phoneNo: memberDtl.phone,
+      planId: memberDtl.plan_id,
+      monthFrom: memberDtl.membership_end
+        ? dmyToYmd(memberDtl.membership_end)
+        : CURRENT_DATE,
+      expiringOn: null,
+      durationInMonths: 0,
+      membershipFee: plans.find((plan) => plan.id === memberDtl.plan_id)?.price,
+      paymentMethod: "CASH",
+    },
+    validationSchema: Yup.object({
+      planId: Yup.number()
+        .typeError("Plan is Invalid") // handles string inputs like "abc"
+        .integer("Plan ID must be an integer")
+        .required("Please Enter This Field"),
+      monthFrom: Yup.date().required("Please Enter This Field"),
+    }),
+    onSubmit: (values, { resetForm }) => {
+      submitPayment(values, resetForm);
+    },
+  });
+
+  const submitPayment = async (values, resetForm) => {
+    console.log(values);
+    setLoader(true);
+    const apiUrl = `${API_BASE_URL}/payment/offline`;
+    const token = localStorage.getItem("authToken");
+    const payload = {
+      memberId: memberDtl.id,
+      planId: values.planId,
+      amountPaid: values.membershipFee,
+      paymentFor: "plan",
+      paymentMethod: "CASH",
+      monthFrom: values.monthFrom,
+    };
+
+    try {
+      await axios
+        .post(apiUrl, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data.status === true) {
+              SuccessToast.show(response.data.message);
+              resetForm();
+            }
+            if (response.data.status === false) {
+              throw response.data.message;
+            }
+          }
+
+          if (response.status != 200) {
+            throw response.statusText;
+          }
+        });
+    } catch (error) {
+      ErrorToast.show(error);
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMemberDetail();
+  }, []);
+
+  useEffect(() => {
+    calculationPayments();
+  }, [formik.values.planId, formik.values.monthFrom]);
+
+  // Calculation of Payments
+  const calculationPayments = async () => {
+    const formattedlaterDate = await getEndingDateByPlanId(
+      formik.values.monthFrom,
+      formik.values.planId,
+      formik.values.durationInMonths
+    );
+    formik.setFieldValue("expiringOn", formattedlaterDate);
+    setTotal(formik.values.membershipFee);
+  };
+
+  // Function to get member's details
+  const fetchMemberDetail = async () => {
+    setLoader(true);
+    const apiUrl = `${API_BASE_URL}/crud/member/detail`;
+    const token = localStorage.getItem("authToken");
+
+    try {
+      await axios
+        .post(
+          apiUrl,
+          {
+            id: memberId,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data.status === true) {
+              setMemberDtl(response.data.data);
+              console.log(memberDtl);
+            }
+            if (response.data.status === false) {
+              throw response.data.message;
+            }
+          }
+
+          if (response.status != 200) {
+            throw response.statusText;
+          }
+        });
+    } catch (error) {
+      ErrorToast.show(error);
+    } finally {
+      setLoader(false);
+    }
+  };
+
   return (
     <>
       <section className="bg-white py-8 antialiased dark:bg-gray-900 md:py-16">
-        <form action="#" className="mx-auto px-5">
+        <form onSubmit={formik.handleSubmit} className="mx-auto px-5">
           <ol className="items-center flex w-full max-w-2xl text-center text-sm font-medium text-gray-500 dark:text-gray-400 sm:text-base">
-            <li className="after:border-1 flex items-center text-primary-700 after:mx-6 after:hidden after:h-1 after:w-full after:border-b after:border-gray-200 dark:text-primary-500 dark:after:border-gray-700 sm:after:inline-block sm:after:content-[''] md:w-full xl:after:mx-10">
+            <li className="after:border-1 flex items-center after:mx-6 after:hidden after:h-1 after:w-full after:border-b after:border-gray-200 dark:text-primary-500 dark:after:border-gray-700 sm:after:inline-block sm:after:content-[''] md:w-full xl:after:mx-10">
               <span className="flex items-center after:mx-2 after:text-gray-200 after:content-['/'] dark:after:text-gray-500 sm:after:hidden">
                 <svg
                   className="me-2 h-4 w-4 sm:h-5 sm:w-5"
@@ -35,7 +183,7 @@ const PaymentForm = () => {
                 Members
               </span>
             </li>
-            <li className="flex shrink-0 items-center">
+            <li className="flex shrink-0 items-center  text-primary-700">
               <svg
                 className="me-2 h-4 w-4 sm:h-5 sm:w-5"
                 aria-hidden="true"
@@ -60,43 +208,51 @@ const PaymentForm = () => {
             <div className="min-w-0 flex-1 space-y-8">
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  <FontAwesomeIcon icon={faUser} /> Member's Payment
+                  <FontAwesomeIcon icon={faUser} /> Member's Payment{" "}
+                  {!isNullOrEmpty(memberDtl.member_id) && (
+                    <span className="text-red-700">
+                      ({memberDtl.member_id})
+                    </span>
+                  )}
                 </h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label
-                      htmlFor="your_name"
+                      htmlFor="name"
                       className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                     >
                       Name
                     </label>
                     <input
                       type="text"
-                      id="your_name"
+                      id="name"
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-                      placeholder="Bonnie Green"
-                      required
+                      onChange={formik.handleChange}
+                      value={formik.values.name}
+                      readOnly
                     />
                   </div>
                   <div>
                     <label
-                      htmlFor="your_email"
+                      htmlFor="email"
                       className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                     >
                       Email
                     </label>
                     <input
                       type="email"
-                      id="your_email"
+                      id="email"
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
                       placeholder="name@flowbite.com"
-                      required
+                      onChange={formik.handleChange}
+                      value={formik.values.email}
+                      readOnly
                     />
                   </div>
 
                   <div>
                     <label
-                      htmlFor="phone-input-3"
+                      htmlFor="phoneNo"
                       className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                     >
                       Phone Number
@@ -634,60 +790,134 @@ const PaymentForm = () => {
                       <div className="relative w-full">
                         <input
                           type="text"
-                          id="phone-input"
+                          id="phoneNo"
                           className="z-20 block w-full rounded-e-lg border border-s-0 border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:border-s-gray-700  dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500"
                           pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                           placeholder="123-456-7890"
-                          required
+                          onChange={formik.handleChange}
+                          value={formik.values.phoneNo}
+                          readOnly
                         />
                       </div>
                     </div>
                   </div>
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Member ID
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-                      placeholder="MEM12345"
-                      required
-                    />
-                  </div>
 
                   <div>
                     <label
-                      htmlFor="email"
-                      className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="planId"
+                      className={`block mb-2 text-sm font-medium
+                                                ${
+                                                  formik.touched.planId &&
+                                                  formik.errors.planId
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
+                                                    `}
                     >
                       Select Plan
                     </label>
                     <select
-                      id="email"
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-                      required
+                      id="planId"
+                      className={`border text-sm rounded-lg block w-full p-2.5
+                                                ${
+                                                  formik.touched.planId &&
+                                                  formik.errors.planId
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
+                                                    `}
+                      onChange={(e) => {
+                        const selectedOption = e.target.selectedOptions[0];
+                        const duration =
+                          selectedOption.getAttribute("data-duration");
+                        const price = selectedOption.getAttribute("data-price");
+                        const isAdmitFee =
+                          selectedOption.getAttribute("data-isadmitfee");
+
+                        formik.setFieldValue("planId", e.target.value);
+                        formik.setFieldValue("durationInMonths", duration);
+                        formik.setFieldValue("membershipFee", price);
+                        formik.setFieldValue("isAdmitFee", isAdmitFee);
+                      }}
+                      value={formik.values.planId}
+                      onBlur={formik.handleBlur}
                     >
                       <option value="">Select Plan</option>
+                      {plans.map((plan) => (
+                        <option
+                          data-duration={plan.duration}
+                          data-price={plan.price}
+                          data-isadmitfee={plan.is_admission_fee_required}
+                          value={plan.id}
+                        >
+                          {plan.plan_name}
+                          <span class="text-sm text-gray-500">
+                            ({plan.duration} In Months)
+                          </span>
+                        </option>
+                      ))}
                     </select>
+                    {formik.touched.planId && formik.errors.planId ? (
+                      <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <span className="font-medium">
+                          {formik.errors.planId}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
 
                   <div>
                     <label
-                      htmlFor="email"
+                      htmlFor="monthFrom"
+                      className={`block mb-2 text-sm font-medium
+                                                ${
+                                                  formik.touched.monthFrom &&
+                                                  formik.errors.monthFrom
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
+                                                    `}
+                    >
+                      Starting From
+                    </label>
+                    <input
+                      type="date"
+                      id="monthFrom"
+                      className={`border text-sm rounded-lg block w-full p-2.5
+                                                ${
+                                                  formik.touched.monthFrom &&
+                                                  formik.errors.monthFrom
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
+                                                    `}
+                      placeholder=""
+                      onChange={formik.handleChange}
+                      value={formik.values.monthFrom}
+                    />
+
+                    {formik.touched.monthFrom && formik.errors.monthFrom ? (
+                      <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <span className="font-medium">
+                          {formik.errors.monthFrom}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="expiringOn"
                       className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
                     >
                       Expiring On
                     </label>
                     <input
                       type="date"
-                      id="email"
+                      id="expiringOn"
                       className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-                      placeholder="MEM12345"
-                      required
+                      value={formik.values.expiringOn}
+                      readOnly
                     />
                   </div>
                 </div>
@@ -702,24 +932,27 @@ const PaymentForm = () => {
                     <div className="flex items-start">
                       <div className="flex h-5 items-center">
                         <input
-                          id="credit-card"
+                          id="cash"
                           aria-describedby="credit-card-text"
                           type="radio"
-                          name="payment-method"
+                          name="paymentMethod"
+                          value="CASH"
                           defaultValue
                           className="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600"
                           defaultChecked
+                          onChange={formik.handleChange}
                         />
                       </div>
                       <div className="ms-4 text-sm">
                         <label
-                          htmlFor="credit-card"
+                          htmlFor="cash"
                           className="font-medium leading-none text-gray-900 dark:text-white"
                         >
                           Cash
                         </label>
                         <p
-                          id="credit-card-text"
+                          id="cash"
+                          name="paymentMethod"
                           className="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400"
                         >
                           Pay with cash amount
@@ -731,17 +964,19 @@ const PaymentForm = () => {
                     <div className="flex items-start">
                       <div className="flex h-5 items-center">
                         <input
-                          id="pay-on-delivery"
+                          id="upi"
                           aria-describedby="pay-on-delivery-text"
                           type="radio"
-                          name="payment-method"
+                          name="paymentMethod"
+                          value="UPI"
                           defaultValue
+                          onChange={formik.handleChange}
                           className="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600"
                         />
                       </div>
                       <div className="ms-4 text-sm">
                         <label
-                          htmlFor="pay-on-delivery"
+                          htmlFor="upi"
                           className="font-medium leading-none text-gray-900 dark:text-white"
                         >
                           UPI
@@ -759,17 +994,19 @@ const PaymentForm = () => {
                     <div className="flex items-start">
                       <div className="flex h-5 items-center">
                         <input
-                          id="paypal-2"
+                          id="bank"
                           aria-describedby="paypal-text"
                           type="radio"
-                          name="payment-method"
+                          name="paymentMethod"
                           defaultValue
+                          value="BANK_TRANSFER"
+                          onChange={formik.handleChange}
                           className="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600"
                         />
                       </div>
                       <div className="ms-4 text-sm">
                         <label
-                          htmlFor="paypal-2"
+                          htmlFor="bank"
                           className="font-medium leading-none text-gray-900 dark:text-white"
                         >
                           Bank Transfer
@@ -794,21 +1031,23 @@ const PaymentForm = () => {
                       Subtotal
                     </dt>
                     <dd className="text-base font-medium text-gray-900 dark:text-white">
-                      ₹8,094.00
+                      ₹{formik.values.membershipFee || 0}
                     </dd>
                   </dl>
                   <dl className="flex items-center justify-between gap-4 py-3">
                     <dt className="text-base font-normal text-gray-500 dark:text-gray-400">
                       Arrear
                     </dt>
-                    <dd className="text-base font-medium text-green-500">0</dd>
+                    <dd className="text-base font-medium text-green-500">
+                      {arrear}
+                    </dd>
                   </dl>
                   <dl className="flex items-center justify-between gap-4 py-3">
                     <dt className="text-base font-normal text-gray-500 dark:text-gray-400">
                       Discount
                     </dt>
                     <dd className="text-base font-medium text-gray-900 dark:text-white">
-                      0
+                      {formik.values.discount ?? 0}
                     </dd>
                   </dl>
                   <dl className="flex items-center justify-between gap-4 py-3">
@@ -816,7 +1055,7 @@ const PaymentForm = () => {
                       Tax
                     </dt>
                     <dd className="text-base font-medium text-gray-900 dark:text-white">
-                      0
+                      {tax}
                     </dd>
                   </dl>
                   <dl className="flex items-center justify-between gap-4 py-3">
@@ -824,7 +1063,7 @@ const PaymentForm = () => {
                       Total
                     </dt>
                     <dd className="text-base font-bold text-gray-900 dark:text-white">
-                      ₹8,094.00
+                      ₹{formik.values.membershipFee || 0}
                     </dd>
                   </dl>
                 </div>
@@ -833,9 +1072,37 @@ const PaymentForm = () => {
                 <button
                   type="submit"
                   className="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4  focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                  disabled={loader}
                 >
-                  <FontAwesomeIcon icon={faCreditCard} className="mr-2" />
-                  Proceed to Pay
+                  {loader ? (
+                    <>
+                      <div>
+                        <svg
+                          aria-hidden="true"
+                          role="status"
+                          className="inline w-4 h-4 me-3 text-white animate-spin"
+                          viewBox="0 0 100 101"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                            fill="#E5E7EB"
+                          />
+                          <path
+                            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                        Loading...
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <FontAwesomeIcon icon={faCreditCard} className="mr-2" />
+                      Proceed to Pay
+                    </>
+                  )}
                 </button>
               </div>
             </div>

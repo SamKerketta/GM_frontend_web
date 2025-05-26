@@ -20,6 +20,7 @@ import {
 import ErrorToast from "../../components/ErrorToast";
 import axios from "axios";
 import SuccessToast from "../../components/SuccessToast";
+import { getEndingDateByPlanId } from "../../Services/Utils";
 
 /**
  * Things to do
@@ -48,7 +49,7 @@ const AddMember = ({
       address: "",
       membershipStart: currentDate,
       endDate: "",
-      isPayment: 0,
+      isPayment: true,
       admissionFee: 0,
       membershipFee: 0,
       payableAmt: 0,
@@ -81,13 +82,16 @@ const AddMember = ({
         .max(100, "Must be 100 characters or less")
         .required("Please Enter This Field"),
       membershipStart: Yup.date().required("Please Enter This Field"),
+      isPayment: Yup.boolean().oneOf(
+        [true],
+        "Payment is required while adding the member"
+      ),
       tac: Yup.boolean().oneOf(
         [true],
         "You must agree with our terms and conditions"
       ),
     }),
     onSubmit: (values, { resetForm }) => {
-      console.log(values);
       submitMember(values, resetForm);
     },
   });
@@ -114,12 +118,11 @@ const AddMember = ({
 
   useEffect(() => {
     if (formik.values.membershipStart && formik.values.planId) {
-      const addMonths = formik.values.durationInMonths; // Do here dynamication as per plan
-      const start = new Date(formik.values.membershipStart);
-      const laterDate = new Date(
-        start.setMonth(start.getMonth() + Number(addMonths))
+      const formattedlaterDate = getEndingDateByPlanId(
+        formik.values.membershipStart,
+        formik.values.planId,
+        formik.values.durationInMonths
       );
-      const formattedlaterDate = laterDate.toISOString().split("T")[0];
       formik.setFieldValue("endDate", formattedlaterDate);
     }
   }, [formik.values.membershipStart, formik.values.planId]);
@@ -526,12 +529,20 @@ const AddMember = ({
                         onChange={formik.handleChange}
                         checked={formik.values.isPayment}
                       />
+
                       <label
                         htmlFor="isPayment"
                         className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                       >
                         Do You Want to Pay ?
                       </label>
+                      {formik.touched.isPayment && formik.errors.isPayment ? (
+                        <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                          <span className="font-medium">
+                            {formik.errors.isPayment}
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
 
                     {/* Payment Parameters */}
