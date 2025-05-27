@@ -1,8 +1,38 @@
 import { faCreditCard } from "@fortawesome/free-solid-svg-icons";
+import { faReceipt } from "@fortawesome/free-solid-svg-icons/faReceipt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button } from "flowbite-react";
+import { useState } from "react";
 import DataTable from "react-data-table-component";
+import Invoice from "../components/Invoice";
 
 const Transactions = () => {
+  const [loader, setLoader] = useState(false);
+  const [openInvoice, setOpenInvoice] = useState(false);
+  const transactions = [
+    {
+      transaction_id: 16,
+      name: "Priya Singh",
+      gender: "female",
+      amount_paid: "8999.00",
+      payment_for: "plan",
+      payment_date: "26-05-2025",
+      month_from: "01-05-2025",
+      month_till: "01-05-2026",
+      invoice_no: "INV2025050015",
+    },
+    {
+      transaction_id: 15,
+      name: "Amit Verma",
+      gender: "male",
+      amount_paid: "8999.00",
+      payment_for: "plan",
+      payment_date: "26-05-2025",
+      month_from: "15-04-2025",
+      month_till: "15-04-2026",
+      invoice_no: "INV2025050014",
+    },
+  ];
   const columns = [
     {
       name: "#",
@@ -10,29 +40,50 @@ const Transactions = () => {
       sortable: true,
     },
     {
-      name: "Member's Name",
+      name: "Invoice No",
+      selector: (row) => row.invoice_no,
+      sortable: true,
+    },
+    {
+      name: "Recipient Name",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      name: "Member's Contact",
-      selector: (row) => row.phone,
+      name: "Payment Date",
+      selector: (row) => row.payment_date,
       sortable: true,
     },
     {
-      name: "Gender",
-      selector: (row) => row.gender,
+      name: "Plan From",
+      selector: (row) => row.month_from,
       sortable: true,
     },
     {
-      name: "Date Of Joining",
-      selector: (row) => row.membership_start,
+      name: "Plan To",
+      selector: (row) => row.month_till,
       sortable: true,
     },
     {
       name: "Due Date",
-      selector: (row) => row.membership_end,
+      selector: (row) => row.month_till,
       sortable: true,
+    },
+    {
+      name: "Action",
+      button: true,
+      cell: (row) => (
+        <div className="flex gap-1 m-2">
+          {/* Info Button */}
+          <Button
+            type="button"
+            className="text-white bg-red-700 rounded-full hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 inline-flex items-center"
+            onClick={() => setOpenInvoice(true)}
+          >
+            <FontAwesomeIcon icon={faReceipt} title="Invoice" />
+          </Button>
+        </div>
+      ),
     },
   ];
 
@@ -52,17 +103,20 @@ const Transactions = () => {
           <DataTable
             fixedHeader
             columns={columns}
-            // data={membersList}
-            // pagination
-            // paginationServer
+            data={transactions}
+            pagination
+            paginationServer
             // paginationTotalRows={totalRows}
             // onChangePage={handlePageChange}
             // onChangeRowsPerPage={handlePerRowsChange}
-            // paginationRowsPerPageOptions={[10, 20, 50]}
-            // progressPending={loader}
+            paginationRowsPerPageOptions={[10, 20, 50]}
+            progressPending={loader}
           />
         </div>
       </div>
+
+      {/* Modal  */}
+      <Invoice openModal={openInvoice} setOpenModal={setOpenInvoice} />
     </>
   );
 };
