@@ -1,3 +1,4 @@
+
 export function isNullOrEmpty(str) {
   return str === null || str === undefined || str.trim() === '';
 }
@@ -19,4 +20,15 @@ export function getEndingDateByPlanId(membershipStart,planId,duration){
       );
       return laterDate.toISOString().split("T")[0];
     }
+}
+
+// 
+export function getDateInLongFormat(){
+  const date = new Date();
+  const formattedDate=date.toLocaleDateString("en-US",{
+      year:"numeric",
+      month:"long",
+      day:"numeric"
+});
+return formattedDate;
 }

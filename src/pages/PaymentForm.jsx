@@ -2,7 +2,7 @@ import { faCreditCard } from "@fortawesome/free-solid-svg-icons/faCreditCard";
 import { faUser } from "@fortawesome/free-solid-svg-icons/faUser";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PageLoader from "../components/PageLoader";
 import axios from "axios";
 import { API_BASE_URL, CURRENT_DATE } from "../config/utilities";
@@ -17,6 +17,7 @@ import * as Yup from "yup";
 import SuccessToast from "../components/SuccessToast";
 
 const PaymentForm = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const plans = location.state.plans;
   const memberId = location.state.memberId;
@@ -78,7 +79,15 @@ const PaymentForm = () => {
           if (response.status === 200) {
             if (response.data.status === true) {
               SuccessToast.show(response.data.message);
-              resetForm();
+              // resetForm();
+              navigate("/payment-success", {
+                state: {
+                  invoiceNo: response.data.data,
+                  amount: formik.values.membershipFee,
+                  paymentMethod: formik.values.paymentMethod,
+                  recipient: formik.values.name,
+                },
+              });
             }
             if (response.data.status === false) {
               throw response.data.message;

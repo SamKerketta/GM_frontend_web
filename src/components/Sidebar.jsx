@@ -13,15 +13,29 @@ const Sidebar = () => {
     },
     {
       menuId: 2,
+      menuName: "Members Desk",
+      fontIcon: null,
+      menuRoute: "/members",
+      isParent: false,
+    },
+    {
+      menuId: 3,
+      menuName: "Transactions",
+      fontIcon: null,
+      menuRoute: "/transactions",
+      isParent: false,
+    },
+    {
+      menuId: 4,
       menuName: "Masters",
       fontIcon: null,
       menuRoute: "#",
       isParent: true,
       child: [
         {
-          menuName: "Members",
+          menuName: "Plans",
           fontIcon: null,
-          menuRoute: "/members",
+          menuRoute: "#",
           isParent: false,
         },
       ],

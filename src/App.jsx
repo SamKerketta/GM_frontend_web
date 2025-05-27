@@ -11,6 +11,8 @@ import { ToastContainer } from "react-toastify";
 import PrivateRoute from "./components/PrivateRoutes";
 import Members from "./pages/Members";
 import PaymentForm from "./pages/PaymentForm";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import Transactions from "./pages/Transactions";
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/members" element={<Members />} />
             <Route path="/member-payment" element={<PaymentForm />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/transactions" element={<Transactions />} />
           </Route>
         </Routes>
       </Router>
