@@ -1,3 +1,4 @@
+import moment from "moment";
 
 export function isNullOrEmpty(str) {
   return str === null || str === undefined || str.trim() === '';
@@ -31,4 +32,12 @@ export function getDateInLongFormat(){
       day:"numeric"
 });
 return formattedDate;
+}
+
+export function dmyToLongForm(date){
+  var formattedDate = date;
+  if(date){
+    formattedDate = moment(date,"DD-MM-YYYY").format("DD MMM, YYYY");
+  }
+  return formattedDate;
 }

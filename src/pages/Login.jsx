@@ -1,16 +1,24 @@
 import axios from "axios";
-import React, { useState } from "react";
-import { API_BASE_URL } from "../config/utilities";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+import React, { useEffect, useState } from "react";
+import { API_BASE_URL, AUTH_TOKEN } from "../config/utilities";
 import ErrorToast from "../components/ErrorToast";
 import SuccessToast from "../components/SuccessToast";
-import { Navigate, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [redirect, setRedirect] = useState(false);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = () => {
+    if (AUTH_TOKEN) {
+      setRedirect(true);
+    }
+  };
 
   const handleLogin = (e) => {
     setLoading(true);

@@ -1,13 +1,57 @@
+import { Modal, ModalBody } from "flowbite-react";
 import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "flowbite-react";
-import { CURRENCY, GYM_NAME } from "../config/utilities";
+  API_BASE_URL,
+  AUTH_TOKEN,
+  CURRENCY,
+  GYM_CONTACT,
+  GYM_EMAIL,
+  GYM_NAME,
+} from "../config/utilities";
+import axios from "axios";
+import { useEffect, useRef, useState } from "react";
+import { dmyToLongForm } from "../Services/Utils";
+import { useReactToPrint } from "react-to-print";
 
-const Invoice = ({ openModal, setOpenModal }) => {
+const Invoice = ({ openModal, setOpenModal, tranId }) => {
+  const [receiptDtls, setReceiptDtls] = useState([]);
+
+  useEffect(() => {
+    if (openModal) {
+      fetchReceiptDetails();
+    }
+  }, [openModal]);
+
+  const apiUrl = `${API_BASE_URL}/payment/receipt`;
+  const fetchReceiptDetails = async () => {
+    await axios
+      .post(
+        apiUrl,
+        {
+          transactionId: tranId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          if (response.data.status === true) {
+            setReceiptDtls(response.data.data);
+            console.log(response.data.data);
+          }
+          if (response.data.status === false) {
+            throw response.data.message;
+          }
+        }
+
+        if (response.status != 200) {
+          throw response.statusText;
+        }
+      });
+  };
+
   return (
     <>
       <Modal size="4xl" show={openModal} onClose={() => setOpenModal(false)}>
@@ -68,7 +112,7 @@ const Invoice = ({ openModal, setOpenModal }) => {
                 {GYM_NAME}
               </h3>
               <p className="text-sm text-gray-500 dark:text-neutral-500">
-                Invoice #3682303
+                Invoice # {receiptDtls.invoice_no}
               </p>
             </div>
             {/* Grid */}
@@ -78,7 +122,8 @@ const Invoice = ({ openModal, setOpenModal }) => {
                   Amount paid:
                 </span>
                 <span className="block text-sm font-medium text-gray-800 dark:text-neutral-200">
-                  {CURRENCY}316.8
+                  {CURRENCY}
+                  {receiptDtls.amount_paid}
                 </span>
               </div>
               {/* End Col */}
@@ -87,7 +132,8 @@ const Invoice = ({ openModal, setOpenModal }) => {
                   Date paid:
                 </span>
                 <span className="block text-sm font-medium text-gray-800 dark:text-neutral-200">
-                  April 22, 2020
+                  {dmyToLongForm(receiptDtls.payment_date)}{" "}
+                  {receiptDtls.payment_time}
                 </span>
               </div>
               {/* End Col */}
@@ -122,7 +168,7 @@ const Invoice = ({ openModal, setOpenModal }) => {
                     </defs>
                   </svg>
                   <span className="block text-sm font-medium text-gray-800 dark:text-neutral-200">
-                    •••• 4242
+                    {receiptDtls.payment_method}
                   </span>
                 </div>
               </div>
@@ -136,20 +182,43 @@ const Invoice = ({ openModal, setOpenModal }) => {
               <ul className="mt-3 flex flex-col">
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                   <div className="flex items-center justify-between w-full">
-                    <span>Payment to Front</span>
-                    <span>{CURRENCY}264.00</span>
+                    <span>Receipient Name</span>
+                    <span>{receiptDtls.name}</span>
                   </div>
                 </li>
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                   <div className="flex items-center justify-between w-full">
-                    <span>Tax fee</span>
-                    <span>{CURRENCY}52.8</span>
+                    <span>Mobile No</span>
+                    <span>{receiptDtls.phone}</span>
+                  </div>
+                </li>
+                <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
+                  <div className="flex items-center justify-between w-full">
+                    <span>Plan Acquired</span>
+                    <span>
+                      {receiptDtls.plan_name} ({receiptDtls.duration})
+                    </span>
+                  </div>
+                </li>
+                <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
+                  <div className="flex items-center justify-between w-full">
+                    <span>Valid From</span>
+                    <span> {dmyToLongForm(receiptDtls.month_from)}</span>
+                  </div>
+                </li>
+                <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
+                  <div className="flex items-center justify-between w-full">
+                    <span>Valid To</span>
+                    <span>{dmyToLongForm(receiptDtls.month_till)}</span>
                   </div>
                 </li>
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200">
                   <div className="flex items-center justify-between w-full">
                     <span>Amount paid</span>
-                    <span>{CURRENCY}316.8</span>
+                    <span>
+                      {CURRENCY}
+                      {receiptDtls.amount_paid}
+                    </span>
                   </div>
                 </li>
               </ul>
@@ -178,10 +247,7 @@ const Invoice = ({ openModal, setOpenModal }) => {
                 </svg>
                 Invoice PDF
               </a>
-              <a
-                className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none"
-                href="#"
-              >
+              <button className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
                 <svg
                   className="shrink-0 size-4"
                   xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +265,7 @@ const Invoice = ({ openModal, setOpenModal }) => {
                   <rect width={12} height={8} x={6} y={14} />
                 </svg>
                 Print
-              </a>
+              </button>
             </div>
             {/* End Buttons */}
             <div className="mt-5 sm:mt-10">
@@ -209,14 +275,14 @@ const Invoice = ({ openModal, setOpenModal }) => {
                   className="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-hidden focus:underline font-medium dark:text-blue-500"
                   href="#"
                 >
-                  example@site.com
+                  {GYM_EMAIL}
                 </a>{" "}
                 or call at{" "}
                 <a
                   className="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-hidden focus:underline font-medium dark:text-blue-500"
                   href="tel:+1898345492"
                 >
-                  +1 898-34-5492
+                  {GYM_CONTACT}
                 </a>
               </p>
             </div>

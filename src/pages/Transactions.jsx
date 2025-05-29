@@ -16,7 +16,6 @@ const Transactions = () => {
   const [loader, setLoader] = useState(false);
   const [openInvoice, setOpenInvoice] = useState(false);
   const [transactions, setTransactions] = useState([]);
-  // const [startDate, setStartDate] = useState(CURRENT_DATE);
   const [startDate, setStartDate] = useState("2025-05-21");
   const [endDate, setEndDate] = useState(CURRENT_DATE);
   const [totalRows, setTotalRows] = useState(0);
@@ -53,7 +52,6 @@ const Transactions = () => {
               setTransactions(response.data.data.data.data);
               setTotalRows(response.data.data.data.total); // total number of records
               setCurrentPage(response.data.data.data.current_page); // update current page
-              console.log("transactions ==================", transactions);
             }
             if (response.data.status === false) {
               throw response.data.message;
@@ -117,7 +115,7 @@ const Transactions = () => {
             type="button"
             className="text-white bg-red-700 rounded-full hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 inline-flex items-center"
             onClick={() => {
-              setTranId(row.id);
+              setTranId(row.transaction_id);
               setOpenInvoice(true);
             }}
           >
@@ -167,7 +165,11 @@ const Transactions = () => {
       </div>
 
       {/* Modal  */}
-      <Invoice openModal={openInvoice} setOpenModal={setOpenInvoice} />
+      <Invoice
+        openModal={openInvoice}
+        setOpenModal={setOpenInvoice}
+        tranId={tranId}
+      />
     </>
   );
 };
