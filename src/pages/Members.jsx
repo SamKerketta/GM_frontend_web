@@ -16,6 +16,7 @@ import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
 import { faBell } from "@fortawesome/free-solid-svg-icons/faBell";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons/faCircleCheck";
 import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons/faMoneyCheckDollar";
+import WidgetLoader from "../components/WidgetLoader";
 
 // Members api
 const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
@@ -67,10 +68,10 @@ const Members = () => {
   };
 
   // Function to get all the members
-  const fetchMembers = (page, perPageSize = perPage) => {
+  const fetchMembers = async (page, perPageSize = perPage) => {
     setLoader(true);
     try {
-      axios
+      await axios
         .post(`${memberListApi}`, {
           page: page,
           perPage: perPageSize,
@@ -267,6 +268,7 @@ const Members = () => {
             onChangeRowsPerPage={handlePerRowsChange}
             paginationRowsPerPageOptions={[10, 20, 50]}
             progressPending={loader}
+            progressComponent={<WidgetLoader />}
           />
         </div>
       </div>

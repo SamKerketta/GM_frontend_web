@@ -2,37 +2,75 @@ import { faCreditCard } from "@fortawesome/free-solid-svg-icons";
 import { faReceipt } from "@fortawesome/free-solid-svg-icons/faReceipt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import Invoice from "../components/Invoice";
+import { API_BASE_URL, CURRENT_DATE } from "../config/utilities";
+import axios from "axios";
+import SuccessToast from "../components/SuccessToast";
+import ErrorToast from "../components/ErrorToast";
+import PageLoader from "../components/PageLoader";
+import WidgetLoader from "../components/WidgetLoader";
 
 const Transactions = () => {
   const [loader, setLoader] = useState(false);
   const [openInvoice, setOpenInvoice] = useState(false);
-  const transactions = [
-    {
-      transaction_id: 16,
-      name: "Priya Singh",
-      gender: "female",
-      amount_paid: "8999.00",
-      payment_for: "plan",
-      payment_date: "26-05-2025",
-      month_from: "01-05-2025",
-      month_till: "01-05-2026",
-      invoice_no: "INV2025050015",
-    },
-    {
-      transaction_id: 15,
-      name: "Amit Verma",
-      gender: "male",
-      amount_paid: "8999.00",
-      payment_for: "plan",
-      payment_date: "26-05-2025",
-      month_from: "15-04-2025",
-      month_till: "15-04-2026",
-      invoice_no: "INV2025050014",
-    },
-  ];
+  const [transactions, setTransactions] = useState([]);
+  // const [startDate, setStartDate] = useState(CURRENT_DATE);
+  const [startDate, setStartDate] = useState("2025-05-21");
+  const [endDate, setEndDate] = useState(CURRENT_DATE);
+  const [totalRows, setTotalRows] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [tranId, setTranId] = useState();
+
+  useEffect(() => {
+    fetchTransactions(currentPage, perPage);
+  }, []);
+
+  const fetchTransactions = async (page, perPageSize = perPage) => {
+    const token = localStorage.getItem("authToken");
+    setLoader(true);
+    try {
+      await axios
+        .post(
+          `${API_BASE_URL}/report/payment-report`,
+          {
+            startDate: startDate,
+            endDate: endDate,
+            page: page,
+            perPage: perPageSize,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            if (response.data.status === true) {
+              setTransactions(response.data.data.data.data);
+              setTotalRows(response.data.data.data.total); // total number of records
+              setCurrentPage(response.data.data.data.current_page); // update current page
+              console.log("transactions ==================", transactions);
+            }
+            if (response.data.status === false) {
+              throw response.data.message;
+            }
+          }
+
+          if (response.status != 200) {
+            throw response.statusText;
+          }
+        });
+    } catch (error) {
+      ErrorToast.show(error.message);
+    } finally {
+      setLoader(false);
+    }
+  };
+
   const columns = [
     {
       name: "#",
@@ -78,7 +116,10 @@ const Transactions = () => {
           <Button
             type="button"
             className="text-white bg-red-700 rounded-full hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 inline-flex items-center"
-            onClick={() => setOpenInvoice(true)}
+            onClick={() => {
+              setTranId(row.id);
+              setOpenInvoice(true);
+            }}
           >
             <FontAwesomeIcon icon={faReceipt} title="Invoice" />
           </Button>
@@ -86,6 +127,15 @@ const Transactions = () => {
       ),
     },
   ];
+
+  const handlePageChange = (page) => {
+    fetchTransactions(page);
+  };
+
+  const handlePerRowsChange = (newPerPage, page) => {
+    setPerPage(newPerPage);
+    fetchTransactions(page, newPerPage);
+  };
 
   return (
     <>
@@ -106,11 +156,12 @@ const Transactions = () => {
             data={transactions}
             pagination
             paginationServer
-            // paginationTotalRows={totalRows}
-            // onChangePage={handlePageChange}
-            // onChangeRowsPerPage={handlePerRowsChange}
+            paginationTotalRows={totalRows}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handlePerRowsChange}
             paginationRowsPerPageOptions={[10, 20, 50]}
             progressPending={loader}
+            progressComponent={<WidgetLoader />}
           />
         </div>
       </div>
