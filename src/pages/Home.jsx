@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import AreaChart from "../components/AreaChart";
 import PieChart from "../components/PieChart";
-import LineChart from "../components/LIneChart";
+import LineChart from "../components/LineChart";
+import BarChart from "../components/BarChart";
 
 const Home = () => {
   return (
@@ -15,6 +16,9 @@ const Home = () => {
         </div>
         <div className="col-span-4">
           <LineChart />
+        </div>
+        <div className="col-span-6">
+          <BarChart />
         </div>
       </div>
     </>
