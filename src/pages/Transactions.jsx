@@ -1,4 +1,4 @@
-import { faCreditCard } from "@fortawesome/free-solid-svg-icons";
+import { faCreditCard, faMoneyBill } from "@fortawesome/free-solid-svg-icons";
 import { faReceipt } from "@fortawesome/free-solid-svg-icons/faReceipt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "flowbite-react";
@@ -11,6 +11,7 @@ import SuccessToast from "../components/SuccessToast";
 import ErrorToast from "../components/ErrorToast";
 import PageLoader from "../components/PageLoader";
 import WidgetLoader from "../components/WidgetLoader";
+import { faArrowDown } from "@fortawesome/free-solid-svg-icons/faArrowDown";
 
 const Transactions = () => {
   const [loader, setLoader] = useState(false);
@@ -84,6 +85,15 @@ const Transactions = () => {
       name: "Recipient Name",
       selector: (row) => row.name,
       sortable: true,
+    },
+    {
+      name: "Payment Amount",
+      cell: (row) => (
+        <div>
+          <FontAwesomeIcon className="text-green-500" icon={faArrowDown} />{" "}
+          <span className="text-green-500">{row.amount_paid}</span>
+        </div>
+      ),
     },
     {
       name: "Payment Date",
