@@ -8,15 +8,13 @@ import axios from "axios";
 import ErrorToast from "../components/ErrorToast";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import AddMember from "../assets/forms/AddMember";
-import { Button } from "flowbite-react";
+import { Button, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
 import { Link } from "react-router-dom";
 import SuccessToast from "../components/SuccessToast";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons/faPaperPlane";
-import { faCheckCircle } from "@fortawesome/free-solid-svg-icons/faCheckCircle";
-import { faBell } from "@fortawesome/free-solid-svg-icons/faBell";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons/faCircleCheck";
 import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons/faMoneyCheckDollar";
 import WidgetLoader from "../components/WidgetLoader";
+import { Modal } from "flowbite-react";
 
 // Members api
 const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
@@ -37,6 +35,9 @@ const Members = () => {
   const planListApi = `${API_BASE_URL}/crud/plans/list`;
   const [plans, setPlans] = useState([]);
   const [notifiedId, setNotifiedId] = useState(null);
+  const [profilePic, setProfilePic] = useState(false);
+  const [profilePath, setProfilePath] = useState();
+  const [memberName, setMemberName] = useState();
 
   useEffect(() => {
     axios.post(`${planListApi}`).then((response) => {
@@ -119,6 +120,16 @@ const Members = () => {
     }
   };
 
+  //
+  const openProfilePic = (row) => {
+    setProfilePath(
+      row.profile ??
+        "https://whitedotpublishers.com/wp-content/uploads/2022/05/male-placeholder-image.jpeg"
+    );
+    setMemberName(row.name);
+    setProfilePic(true);
+  };
+
   const columns = [
     {
       name: "#",
@@ -127,7 +138,13 @@ const Members = () => {
     },
     {
       name: "Member's Name",
-      selector: (row) => row.name,
+      cell: (row, index) => (
+        <>
+          <div className="cursor-pointer" onClick={() => openProfilePic(row)}>
+            {row.name}
+          </div>
+        </>
+      ),
       sortable: true,
     },
     {
@@ -280,6 +297,25 @@ const Members = () => {
         plans={plans}
         setPlans={setPlans}
       />
+
+      {/* Modal open for the profile pic image */}
+      <Modal
+        show={profilePic}
+        onClose={() => setProfilePic(false)}
+        dismissible={true}
+      >
+        <ModalHeader>{memberName}</ModalHeader>
+        <ModalBody>
+          <div className="space-y-6">
+            <img src={profilePath} alt="" srcset="" />
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="gray" onClick={() => setProfilePic(false)}>
+            Close
+          </Button>
+        </ModalFooter>
+      </Modal>
     </>
   );
 };

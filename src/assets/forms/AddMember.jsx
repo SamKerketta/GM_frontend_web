@@ -154,6 +154,7 @@ const AddMember = ({
           onClose={() => {
             setOpenMemberModal(false);
           }}
+          dismissible={true}
         >
           <form onSubmit={formik.handleSubmit}>
             <ModalHeader>
