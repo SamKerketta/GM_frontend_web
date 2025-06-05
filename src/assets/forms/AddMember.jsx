@@ -22,6 +22,7 @@ import axios from "axios";
 import SuccessToast from "../../components/SuccessToast";
 import { getEndingDateByPlanId } from "../../Services/Utils";
 import { useNavigate } from "react-router-dom";
+import { faUsers } from "@fortawesome/free-solid-svg-icons";
 
 /**
  * Things to do
@@ -38,6 +39,9 @@ const AddMember = ({
   const [plans, setPlans] = useState([]);
   const planListApi = `${API_BASE_URL}/crud/plans/list`;
   const navigate = useNavigate();
+  const [previewProfile, setPreviewProfile] = useState(
+    "https://whitedotpublishers.com/wp-content/uploads/2022/05/male-placeholder-image.jpeg"
+  );
 
   // Fetch Plan list
   useEffect(() => {
@@ -154,15 +158,37 @@ const AddMember = ({
     }
   }, [formik.values.isPayment, formik.values.planId]);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setPreviewProfile(imageUrl);
+    }
+  };
+
   return (
     <>
+      <div class="grid grid-cols-12 gap-4">
+        <div className="col-span-6">
+          <h2 class="mb-4 text-3xl font-semibold leading-none tracking-tight text-gray-900 md:text-2xl dark:text-white float-right">
+            <FontAwesomeIcon icon={faUsers} /> Add Member
+          </h2>
+        </div>
+        <div className="col-span-12 mt-[-10px]">
+          <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700" />
+        </div>
+      </div>
       {/* Main modal */}
-      <form onSubmit={formik.handleSubmit}>
+      <form
+        onSubmit={formik.handleSubmit}
+        className="mt-1 mb-2 container mx-auto"
+      >
         {/* Modal content */}
         <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
           <div className="p-4 md:p-5">
             <div class="grid grid-cols-12 gap-4">
-              <div className="col-span-6">
+              <div className="col-span-4">
                 <label
                   htmlFor="name"
                   className={`block mb-2 text-sm font-medium
@@ -199,7 +225,7 @@ const AddMember = ({
                   </div>
                 ) : null}
               </div>
-              <div className="col-span-6">
+              <div className="col-span-4">
                 <label
                   htmlFor="email"
                   className={`block mb-2 text-sm font-medium
@@ -235,7 +261,7 @@ const AddMember = ({
                   </div>
                 ) : null}
               </div>
-              <div className="col-span-6">
+              <div className="col-span-4">
                 <label
                   htmlFor="phone"
                   className={`block mb-2 text-sm font-medium
@@ -272,7 +298,8 @@ const AddMember = ({
                   </div>
                 ) : null}
               </div>
-              <div className="col-span-6">
+
+              <div className="col-span-3">
                 <label
                   htmlFor="dob"
                   className={`block mb-2 text-sm font-medium
@@ -309,7 +336,7 @@ const AddMember = ({
                   </div>
                 ) : null}
               </div>
-              <div className="col-span-6">
+              <div className="col-span-3">
                 <label
                   htmlFor="gender"
                   className={`block mb-2 text-sm font-medium
@@ -348,7 +375,7 @@ const AddMember = ({
                   </div>
                 ) : null}
               </div>
-              <div className="col-span-6">
+              <div className="col-span-3">
                 <label
                   htmlFor="planId"
                   className={`block mb-2 text-sm font-medium
@@ -411,6 +438,46 @@ const AddMember = ({
                   </div>
                 ) : null}
               </div>
+              <div className="col-span-3">
+                <label
+                  htmlFor="shiftId"
+                  className={`block mb-2 text-sm font-medium
+                                                ${
+                                                  formik.touched.shiftId &&
+                                                  formik.errors.shiftId
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
+                                                    `}
+                >
+                  Select Shift
+                </label>
+                <select
+                  name="shiftId"
+                  id="shiftId"
+                  className={`border text-sm rounded-lg block w-full p-2.5
+                                                ${
+                                                  formik.touched.shiftId &&
+                                                  formik.errors.shiftId
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
+                                                    `}
+                  onChange={formik.handleChange}
+                  value={formik.values.shiftId}
+                  onBlur={formik.handleBlur}
+                >
+                  <option value="">Select Shift</option>
+                  <option value="">Morning</option>
+                  <option value="">Evening</option>
+                </select>
+                {formik.touched.shiftId && formik.errors.shiftId ? (
+                  <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                    <span className="font-medium">{formik.errors.shiftId}</span>
+                  </div>
+                ) : null}
+              </div>
+
               <div className="col-span-12">
                 <label
                   htmlFor="address"
@@ -447,7 +514,58 @@ const AddMember = ({
                 ) : null}
               </div>
 
-              <div className="col-span-6">
+              <div className="col-span-8">
+                <div className="flex items-center justify-center w-full">
+                  <label
+                    htmlFor="dropzone-file"
+                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg
+                        className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 20 16"
+                      >
+                        <path
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                        />
+                      </svg>
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">
+                          Click to upload Profile Image
+                        </span>{" "}
+                        or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        SVG, PNG, JPG or GIF (MAX. 800x400px)
+                      </p>
+                    </div>
+                    <input
+                      id="dropzone-file"
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="cols-span-4">
+                <img
+                  src={previewProfile}
+                  alt=""
+                  srcset=""
+                  className="h-40 min-w-[296px]"
+                />
+              </div>
+
+              <div className="col-span-4">
                 <label
                   htmlFor="membershipStart"
                   className={`block mb-2 text-sm font-medium
@@ -487,7 +605,7 @@ const AddMember = ({
                   </div>
                 ) : null}
               </div>
-              <div className="col-span-6">
+              <div className="col-span-4">
                 <label
                   htmlFor="endDate"
                   className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -503,7 +621,7 @@ const AddMember = ({
                   readOnly
                 />
               </div>
-              <div className="col-span-12">
+              <div className="col-span-4 mt-5">
                 <input
                   id="isPayment"
                   type="checkbox"
@@ -614,7 +732,7 @@ const AddMember = ({
               <div className="col-span-12">
                 <div class="bg-white float-right">
                   <Button type="submit">
-                    <FontAwesomeIcon icon={faUser} className="mr-2" /> Save
+                    <FontAwesomeIcon icon={faUser} className="mr-1" /> Save
                     Member
                   </Button>
                 </div>
