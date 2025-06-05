@@ -261,13 +261,12 @@ const Members = () => {
           </h2>
         </div>
         <div class="col-span-6">
-          <button
-            type="button"
+          <Link
+            to="/add-member"
             class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 float-right"
-            onClick={() => setOpenMemberModal(true)}
           >
             <FontAwesomeIcon icon={faUser} /> Add Member
-          </button>
+          </Link>
         </div>
         <div className="col-span-12">
           <hr className="h-px bg-gray-200 border-0 dark:bg-gray-700" />
@@ -289,14 +288,6 @@ const Members = () => {
           />
         </div>
       </div>
-
-      <AddMember
-        openMemberModal={openMemberModal}
-        setOpenMemberModal={setOpenMemberModal}
-        setreloadMembers={setreloadMembers}
-        plans={plans}
-        setPlans={setPlans}
-      />
 
       {/* Modal open for the profile pic image */}
       <Modal

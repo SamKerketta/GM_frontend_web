@@ -13,6 +13,7 @@ import Members from "./pages/Members";
 import PaymentForm from "./pages/PaymentForm";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Transactions from "./pages/Transactions";
+import AddMember from "./assets/forms/AddMember";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           >
             <Route path="/" element={<Home />} />
             <Route path="/members" element={<Members />} />
+            <Route path="/add-member" element={<AddMember />} />
             <Route path="/member-payment" element={<PaymentForm />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/transactions" element={<Transactions />} />
