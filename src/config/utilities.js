@@ -5,4 +5,16 @@ export const GYM_CONTACT = '+91 0123456789';
 export const CURRENT_DATE = new Date().toISOString().split('T')[0];
 export const ADMITION_FEE = 200;
 export const CURRENCY = '₹';
-export const AUTH_TOKEN=localStorage.getItem("authToken");
+export const AUTH_TOKEN = localStorage.getItem("authToken");
+export const SHIFTS = [
+    {
+        "id": 1,
+        "shift_name": "Morning"
+    },
+    {
+        "id": 2,
+        "shift_name": "Evening"
+    },
+];
+
+export const SUPPORTED_FORMATS = ['image/jpeg', 'image/png'];

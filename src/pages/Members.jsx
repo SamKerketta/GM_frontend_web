@@ -15,6 +15,7 @@ import { faCircleCheck } from "@fortawesome/free-solid-svg-icons/faCircleCheck";
 import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons/faMoneyCheckDollar";
 import WidgetLoader from "../components/WidgetLoader";
 import { Modal } from "flowbite-react";
+import { isNullOrEmpty } from "../Services/Utils";
 
 // Members api
 const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
@@ -122,9 +123,9 @@ const Members = () => {
 
   //
   const openProfilePic = (row) => {
+    const photoUrl = isNullOrEmpty(row.photo_url) ? 'https://whitedotpublishers.com/wp-content/uploads/2022/05/male-placeholder-image.jpeg' : row.photo_url;
     setProfilePath(
-      row.profile ??
-        "https://whitedotpublishers.com/wp-content/uploads/2022/05/male-placeholder-image.jpeg"
+      photoUrl
     );
     setMemberName(row.name);
     setProfilePic(true);
@@ -155,6 +156,11 @@ const Members = () => {
     {
       name: "Gender",
       selector: (row) => row.gender,
+      sortable: true,
+    },
+    {
+      name: "Shift",
+      selector: (row) => row.shift_name,
       sortable: true,
     },
     {
