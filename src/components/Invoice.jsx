@@ -54,7 +54,12 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
 
   return (
     <>
-      <Modal size="4xl" show={openModal} onClose={() => setOpenModal(false)}>
+      <Modal
+        size="4xl"
+        show={openModal}
+        dismissible
+        onClose={() => setOpenModal(false)}
+      >
         <ModalBody>
           {/* Modal */}
           <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center rounded-t-xl dark:bg-neutral-950">

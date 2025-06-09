@@ -295,51 +295,74 @@ const Members = () => {
         <div className="col-span-3"></div>
         {/* Search filterations */}
         <div className="col-span-3">
-          <form>
-            <div className="flex">
-              <Dropdown label="DueStatus" disabled={loader}>
-                <DropdownItem onClick={() => setSearchDueStatus(1)}>
-                  Dues
-                </DropdownItem>
-                <DropdownItem onClick={() => setSearchDueStatus(0)}>
-                  No Dues
-                </DropdownItem>
-              </Dropdown>
-
-              <div className="relative w-full">
-                <input
-                  type="search"
-                  id="search-dropdown"
-                  className="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
-                  placeholder="Search Name/Phone"
-                  onChange={(e) => setSearchMember(e.target.value)}
-                  required
-                />
+          <div className="flex">
+            <Dropdown
+              label="DueStatus"
+              renderTrigger={() => (
                 <button
                   type="button"
-                  onClick={() => setreloadMembers(true)}
-                  disabled={loader}
-                  className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  className="whitespace-nowrap inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 hover:text-white border border-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 rounded-lg text-center me-2 mb-2 dark:border-green-500 dark:text-green-500 dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-green-800"
                 >
+                  Due Filter
                   <svg
-                    className="w-4 h-4"
+                    className="w-4 h-4 ml-2"
                     aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
                     fill="none"
-                    viewBox="0 0 20 20"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
                     <path
-                      stroke="currentColor"
+                      d="M19 9l-7 7-7-7"
+                      strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
                     />
                   </svg>
                 </button>
-              </div>
+              )}
+              disabled={loader}
+            >
+              <DropdownItem onClick={() => setSearchDueStatus(1)}>
+                Dues
+              </DropdownItem>
+              <DropdownItem onClick={() => setSearchDueStatus(0)}>
+                No Dues
+              </DropdownItem>
+            </Dropdown>
+
+            <div className="relative w-full">
+              <input
+                type="search"
+                id="search-dropdown"
+                className="block p-2.5 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
+                placeholder="Search Name/Phone"
+                onChange={(e) => setSearchMember(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setreloadMembers(true)}
+                disabled={loader}
+                className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                <svg
+                  className="w-4 h-4"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+              </button>
             </div>
-          </form>
+          </div>
         </div>
 
         <div className="col-span-12">
@@ -358,6 +381,8 @@ const Members = () => {
             onChangeRowsPerPage={handlePerRowsChange}
             paginationRowsPerPageOptions={[10, 20, 50]}
             progressPending={loader}
+            highlightOnHover
+            pointerOnHover
             progressComponent={<WidgetLoader />}
           />
         </div>

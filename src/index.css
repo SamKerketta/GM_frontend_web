@@ -3,6 +3,7 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 /* @import "flowbite"; */
+@import "react-datepicker/dist/react-datepicker.css";
 
 .mylogo {
   width: 30%;
@@ -29,7 +30,6 @@ body {
 .menu-top-right {
   border-top-right-radius: 21px;
 }
-
 
 .max-w-md-modal {
   max-width: 70rem;
