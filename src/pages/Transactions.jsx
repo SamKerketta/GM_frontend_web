@@ -15,6 +15,7 @@ import { faArrowDown } from "@fortawesome/free-solid-svg-icons/faArrowDown";
 import DatePicker from "react-datepicker";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { format } from "date-fns";
 
 const Transactions = () => {
   const [loader, setLoader] = useState(false);
@@ -24,6 +25,10 @@ const Transactions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [tranId, setTranId] = useState();
+  const [filterStartDate, setFilterStartDate] = useState();
+  const [filterEndDate, setFilterEndDate] = useState();
+  const [filterRecipient, setFilterRecipient] = useState();
+  const [totalAmount, setTotalAmount] = useState();
   const formik = useFormik({
     initialValues: {
       paymentFrom: null,
@@ -45,13 +50,25 @@ const Transactions = () => {
         ),
     }),
     onSubmit: (values, { resetForm }) => {
-      // submitMember(values, resetForm);
+      setFilterRecipient(values.recipientName);
     },
   });
 
   useEffect(() => {
     fetchTransactions(currentPage, perPage);
-  }, []);
+  }, [filterStartDate, filterEndDate, filterRecipient]);
+
+  useEffect(() => {
+    console.log(formik.values);
+    if (formik.values.paymentFrom && formik.values.paymentTo) {
+      const startDate = format(formik.values.paymentFrom, "yyyy-MM-dd");
+      const endDate = format(formik.values.paymentTo, "yyyy-MM-dd");
+      if (endDate >= startDate) {
+        setFilterStartDate(startDate);
+        setFilterEndDate(endDate);
+      }
+    }
+  }, [formik.values.paymentFrom, formik.values.paymentTo]);
 
   const fetchTransactions = async (page, perPageSize = perPage) => {
     const token = localStorage.getItem("authToken");
@@ -61,8 +78,9 @@ const Transactions = () => {
         .post(
           `${API_BASE_URL}/report/payment-report`,
           {
-            // startDate: formik.values.paymentFrom,
-            // endDate: formik.values.paymentTo,
+            startDate: filterStartDate,
+            endDate: filterEndDate,
+            recipientName: filterRecipient,
             page: page,
             perPage: perPageSize,
           },
@@ -78,6 +96,7 @@ const Transactions = () => {
               setTransactions(response.data.data.data.data);
               setTotalRows(response.data.data.data.total); // total number of records
               setCurrentPage(response.data.data.data.current_page); // update current page
+              setTotalAmount(response.data.data.total_amount ?? 0);
             }
             if (response.data.status === false) {
               throw response.data.message;
@@ -183,26 +202,41 @@ const Transactions = () => {
               <DatePicker
                 data-tooltip-target="start-date-tooltip"
                 data-tooltip-style="light"
-                // selected={startDate}
-                // onChange={(date) => setStartDate(date)}
+                selected={formik.values.paymentFrom}
                 placeholderText="Select Start date"
                 className="border p-2 rounded"
                 dateFormat="dd-MM-yyyy"
                 isClearable
+                maxDate={CURRENT_DATE}
+                onChange={(date) => formik.setFieldValue("paymentFrom", date)}
+                onBlur={formik.handleBlur}
               />
+
+              {formik.touched.paymentFrom && formik.errors.paymentFrom ? (
+                <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                  <span class="font-medium">{formik.errors.paymentFrom}</span>
+                </p>
+              ) : null}
             </Tooltip>
             <Tooltip content="Select Payment To" style="light" placement="top">
               <DatePicker
                 data-tooltip-target="start-date-tooltip"
                 data-tooltip-style="light"
-                // selected={endDate}
-                // onChange={(date) => setEndDate(date)}
+                selected={formik.values.paymentTo}
+                onChange={(date) => formik.setFieldValue("paymentTo", date)}
                 placeholderText="Select End date"
-                // minDate={startDate}
+                minDate={formik.values.paymentFrom}
                 className="border p-2 rounded"
                 dateFormat="dd-MM-yyyy"
                 isClearable
+                maxDate={CURRENT_DATE}
+                onBlur={formik.handleBlur}
               />
+              {formik.touched.paymentTo && formik.errors.paymentTo ? (
+                <p class="mt-2 text-sm text-red-600 dark:text-red-500">
+                  <span class="font-medium">{formik.errors.paymentTo}</span>
+                </p>
+              ) : null}
             </Tooltip>
           </div>
         </div>
@@ -216,7 +250,7 @@ const Transactions = () => {
         <div className="col-span-3"></div>
 
         <div className="col-span-3">
-          <form>
+          <form onSubmit={formik.handleSubmit}>
             <div class="relative">
               <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                 <svg
@@ -237,10 +271,12 @@ const Transactions = () => {
               </div>
               <input
                 type="search"
-                id="search"
+                id="recipientName"
+                name="recipientName"
                 class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Search Recipient"
-                required
+                value={formik.values.recipientName}
+                onChange={formik.handleChange}
               />
               <button
                 type="submit"
@@ -285,6 +321,9 @@ const Transactions = () => {
             pointerOnHover
             progressComponent={<WidgetLoader />}
           />
+          <div className="p-2 border-t bg-gray-50 text-right">
+            Total Amount: <span className="font-semibold">₹{totalAmount}</span>
+          </div>
         </div>
       </div>
 
