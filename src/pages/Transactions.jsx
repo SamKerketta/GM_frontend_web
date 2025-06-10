@@ -80,7 +80,7 @@ const Transactions = () => {
           {
             startDate: filterStartDate,
             endDate: filterEndDate,
-            recipientName: filterRecipient,
+            name: filterRecipient,
             page: page,
             perPage: perPageSize,
           },
