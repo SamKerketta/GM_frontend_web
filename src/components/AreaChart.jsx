@@ -1,12 +1,13 @@
 // src/components/AreaChart.jsx
-import React from "react";
+import React, { useContext } from "react";
 import ReactApexChart from "react-apexcharts";
 
-const AreaChart = () => {
+const AreaChart = (props) => {
+  console.log("Chart DAta ======= ", props.chartData);
   const series = [
     {
       name: "Revenue",
-      data: [3000, 4000, 3200, 5000, 4800, 5300],
+      data: props.chartData?.series,
     },
   ];
 
@@ -34,7 +35,7 @@ const AreaChart = () => {
       },
     },
     xaxis: {
-      categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      categories: props.chartData?.labels,
     },
     tooltip: {
       x: {
