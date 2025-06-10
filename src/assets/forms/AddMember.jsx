@@ -23,7 +23,7 @@ import {
 import ErrorToast from "../../components/ErrorToast";
 import axios from "axios";
 import SuccessToast from "../../components/SuccessToast";
-import { getEndingDateByPlanId } from "../../Services/Utils";
+import { getEndingDateByPlanId, handleValidation } from "../../Services/Utils";
 import { useNavigate } from "react-router-dom";
 import { faUsers } from "@fortawesome/free-solid-svg-icons";
 
@@ -133,29 +133,38 @@ const AddMember = ({
   });
 
   // Submit Members api call
-  const submitMember = (payload, resetForm) => {
-    axios
-      .post(`${addMemberApi}`, payload, {
-        headers: {
-          Authorization: `Bearer ${AUTH_TOKEN}`,
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          const apiData = response.data;
-          if (apiData.status === true) {
-            SuccessToast.show(apiData.message);
-            resetForm();
-            navigate("/members");
+  const submitMember = async (payload, resetForm) => {
+    try {
+      await axios
+        .post(`${addMemberApi}`, payload, {
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            const apiData = response.data;
+            if (apiData.status === true) {
+              SuccessToast.show(apiData.message);
+              resetForm();
+              navigate("/members");
+            }
+            if (apiData.status === false) {
+              throw apiData;
+            }
+          } else {
+            throw response.data.message;
           }
-          if (apiData.status === false) {
-            ErrorToast.show(apiData.message);
-          }
-        } else {
-          ErrorToast.show(response.data.message);
-        }
-      });
+        });
+    } catch (error) {
+      if (error.errors) {
+        handleValidation(error.errors);
+      } else {
+        ErrorToast.show(error);
+      }
+    } finally {
+    }
   };
 
   useEffect(() => {

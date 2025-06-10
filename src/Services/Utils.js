@@ -1,4 +1,5 @@
 import moment from "moment";
+import ErrorToast from "../components/ErrorToast";
 
 export function isNullOrEmpty(str) {
   return str === null || str === undefined || str.trim() === '';
@@ -40,4 +41,12 @@ export function dmyToLongForm(date){
     formattedDate = moment(date,"DD-MM-YYYY").format("DD MMM, YYYY");
   }
   return formattedDate;
+}
+
+export function handleValidation(errors){
+  const apiErrors = errors;
+  // Loop through all error messages and show toasts
+  Object.keys(apiErrors).forEach((field) => {
+    apiErrors[field].forEach((msg) => ErrorToast.show(msg));
+  });
 }
