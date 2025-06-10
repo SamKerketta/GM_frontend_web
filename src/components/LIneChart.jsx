@@ -1,10 +1,10 @@
 import ReactApexChart from "react-apexcharts";
 
-const LineChart = () => {
+const LineChart = (props) => {
   const series = [
     {
       name: "Number Of Members",
-      data: [10, 20, 30, 50, 48, 25],
+      data: props.chartData?.series,
     },
   ];
 
@@ -23,7 +23,7 @@ const LineChart = () => {
       curve: "smooth",
     },
     xaxis: {
-      categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      categories: props.chartData?.labels,
     },
     tooltip: {
       x: {

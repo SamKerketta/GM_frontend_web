@@ -3,7 +3,6 @@ import React, { useContext } from "react";
 import ReactApexChart from "react-apexcharts";
 
 const AreaChart = (props) => {
-  console.log("Chart DAta ======= ", props.chartData);
   const series = [
     {
       name: "Revenue",
@@ -46,7 +45,7 @@ const AreaChart = (props) => {
 
   return (
     <div className="w-full max-w-3xl p-4 bg-white rounded-2xl shadow-md mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Monthly Revenue</h2>
+      <h2 className="text-xl font-semibold mb-4">{props.chartData?.name}</h2>
       <ReactApexChart
         options={options}
         series={series}

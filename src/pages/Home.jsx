@@ -14,6 +14,9 @@ const Home = () => {
   const [apiData, setApiData] = useState();
   const [areaChartData, setAreaChartData] = useState([]);
   const [loader, setLoader] = useState(false);
+  const [pieChartData, setPieChartData] = useState([]);
+  const [lineChartData, setLineChartData] = useState([]);
+  const [barChartData, setBarChartData] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -56,19 +59,24 @@ const Home = () => {
       return item.serial === 1;
     });
     setAreaChartData(areaChartData);
-    console.log(areaChartData);
 
     const pieChartData = data.find((item) => {
       return item.serial === 2;
     });
 
+    setPieChartData(pieChartData);
+
     const lineChartData = data.find((item) => {
       return item.serial === 3;
     });
 
+    setLineChartData(lineChartData);
+
     const barChartData = data.find((item) => {
       return item.serial === 4;
     });
+
+    setBarChartData(barChartData);
   };
 
   return (
@@ -81,13 +89,13 @@ const Home = () => {
             <AreaChart chartData={areaChartData} />
           </div>
           <div className="col-span-4">
-            <PieChart />
+            <PieChart chartData={pieChartData} />
           </div>
           <div className="col-span-4">
-            <LineChart />
+            <LineChart chartData={lineChartData} />
           </div>
           <div className="col-span-6">
-            <BarChart />
+            <BarChart chartData={barChartData} />
           </div>
         </div>
       )}

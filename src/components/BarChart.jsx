@@ -1,10 +1,12 @@
 import ReactApexChart from "react-apexcharts";
 
-const BarChart = () => {
+const BarChart = (props) => {
+  console.log(props.chartData);
+
   const series = [
     {
-      name: "Number Of Members",
-      data: [10, 20, 2],
+      name: props.chartData?.name,
+      data: props.chartData?.series,
     },
   ];
 
@@ -27,14 +29,14 @@ const BarChart = () => {
       curve: "smooth",
     },
     xaxis: {
-      categories: ["Morning", "Evening", "Others"],
+      categories: props.chartData?.labels,
     },
   };
 
   return (
     <>
       <div className="w-full max-w-3xl p-4 bg-white rounded-2xl shadow-md mx-auto">
-        <h2 className="text-xl font-semibold mb-4">Shift Wise Members</h2>
+        <h2 className="text-xl font-semibold mb-4">{props.chartData?.name}</h2>
         <ReactApexChart
           options={options}
           series={series}
