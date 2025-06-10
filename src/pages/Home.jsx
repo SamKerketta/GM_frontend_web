@@ -40,7 +40,6 @@ const Home = () => {
           const data = response.data.data;
           setApiData(data); // ✅ still update state
           feedGraphData(data); // ✅ use fresh data immediately
-          SuccessToast.show(response.data.message);
         } else {
           throw response.data.message;
         }
