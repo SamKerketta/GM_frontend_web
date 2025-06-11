@@ -385,6 +385,9 @@ const Members = () => {
             pointerOnHover
             progressComponent={<WidgetLoader />}
           />
+          <div className="p-2 border-t bg-gray-50 text-right">
+            Total Members: <span className="font-semibold">{totalRows}</span>
+          </div>
         </div>
       </div>
 
