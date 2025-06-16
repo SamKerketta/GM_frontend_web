@@ -10,7 +10,7 @@ import {
   ModalHeader,
 } from "flowbite-react";
 import { useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import {
   ADMITION_FEE,
@@ -46,6 +46,8 @@ const AddMember = ({
     "https://whitedotpublishers.com/wp-content/uploads/2022/05/male-placeholder-image.jpeg"
   );
 
+  const firstRender = useRef(true);
+
   // Fetch Plan list
   useEffect(() => {
     axios.post(`${planListApi}`).then((response) => {
@@ -80,6 +82,8 @@ const AddMember = ({
       durationInMonths: 0,
       isAdmitFee: 0,
       photo: null,
+      netAmt: 0,
+      discount: 0,
     },
     validationSchema: Yup.object({
       name: Yup.string()
@@ -126,6 +130,7 @@ const AddMember = ({
         .test("fileSize", "File size too large (max 2MB)", (value) => {
           return value && value.size <= 2 * 1024 * 1024; // 2MB
         }),
+      discount: Yup.number().max(100),
     }),
     onSubmit: (values, { resetForm }) => {
       submitMember(values, resetForm);
@@ -180,16 +185,33 @@ const AddMember = ({
 
   // Payment Calculation
   useEffect(() => {
-    if (formik.values.isPayment) {
+    if (formik.values.isPayment && formik.values.discount <= 100) {
       const admissionFee = formik.values.isAdmitFee == 1 ? ADMITION_FEE : 0;
       const membershipFeePerMonth = Number(formik.values.membershipFee); // Vary as per Plan
-      const totalPayableAmt = admissionFee + membershipFeePerMonth;
+      const netAmt = admissionFee + membershipFeePerMonth;
+      const discount = (netAmt * formik.values.discount) / 100;
+      const payableAmt = Math.round(netAmt - discount);
+      const arrear = netAmt - payableAmt;
 
       formik.setFieldValue("admissionFee", admissionFee);
       formik.setFieldValue("membershipFee", membershipFeePerMonth);
-      formik.setFieldValue("payableAmt", totalPayableAmt);
+      formik.setFieldValue("netAmt", netAmt);
+      formik.setFieldValue("payableAmt", payableAmt);
+      formik.setFieldValue("arrear", arrear);
     }
-  }, [formik.values.isPayment, formik.values.planId]);
+  }, [formik.values.isPayment, formik.values.planId, formik.values.discount]);
+
+  // Discount Calculation
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false; // Skip the first render
+      return;
+    }
+    const discountPerc =
+      (formik.values.payableAmt / formik.values.netAmt) * 100;
+    console.log(discountPerc);
+    // formik.setFieldValue("discount", discountPerc);
+  }, [formik.values.payableAmt]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -695,61 +717,121 @@ const AddMember = ({
 
               {/* Payment Parameters */}
               {formik.values.isPayment ? (
-                <div className="col-span-4">
-                  <label
-                    htmlFor="admissionFee"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Admission Fee
-                  </label>
-                  <input
-                    type="text"
-                    name="admissionFee"
-                    id="admissionFee"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    value={formik.values.admissionFee}
-                    readOnly
-                  />
-                </div>
+                <>
+                  <div className="col-span-2">
+                    <label
+                      htmlFor="admissionFee"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Admission Fee
+                    </label>
+                    <input
+                      type="text"
+                      name="admissionFee"
+                      id="admissionFee"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      value={formik.values.admissionFee}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label
+                      htmlFor="membershipFee"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Membership Fee
+                    </label>
+                    <input
+                      type="text"
+                      name="membershipFee"
+                      id="membershipFee"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      value={formik.values.membershipFee}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label
+                      htmlFor="netAmt"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Net Amount
+                    </label>
+                    <input
+                      type="text"
+                      name="netAmt"
+                      id="netAmt"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      value={formik.values.netAmt}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label
+                      htmlFor="discount"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Discount
+                      <span className="text-red-700"> (In Perc.)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="discount"
+                      id="discount"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      value={formik.values.discount}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                    />
+                    {formik.touched.discount && formik.errors.discount ? (
+                      <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <span className="font-medium">
+                          {formik.errors.discount}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="col-span-2">
+                    <label
+                      htmlFor="payableAmt"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Payable Amount{" "}
+                      <span className="text-red-700">(Rounded Off)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="payableAmt"
+                      id="payableAmt"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      value={formik.values.payableAmt}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label
+                      htmlFor="arrear"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Arrear
+                    </label>
+                    <input
+                      type="text"
+                      name="arrear"
+                      id="arrear"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      value={formik.values.arrear}
+                      readOnly
+                    />
+                  </div>
+                </>
               ) : null}
 
-              {formik.values.isPayment ? (
-                <div className="col-span-4">
-                  <label
-                    htmlFor="membershipFee"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Membership Fee
-                  </label>
-                  <input
-                    type="text"
-                    name="membershipFee"
-                    id="membershipFee"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    value={formik.values.membershipFee}
-                    readOnly
-                  />
-                </div>
-              ) : null}
-
-              {formik.values.isPayment ? (
-                <div className="col-span-4">
-                  <label
-                    htmlFor="payableAmt"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Payable Amount
-                  </label>
-                  <input
-                    type="text"
-                    name="payableAmt"
-                    id="payableAmt"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    value={formik.values.payableAmt}
-                    readOnly
-                  />
-                </div>
-              ) : null}
               {/* Payment Parameters */}
 
               <div className="col-span-12">
