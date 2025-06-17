@@ -84,6 +84,7 @@ const AddMember = ({
       photo: null,
       netAmt: 0,
       discount: 0,
+      paymentMethod: "CASH",
     },
     validationSchema: Yup.object({
       name: Yup.string()
@@ -141,6 +142,8 @@ const AddMember = ({
 
   // Submit Members api call
   const submitMember = async (payload, resetForm) => {
+    // console.log(payload);
+    // return;
     try {
       await axios
         .post(`${addMemberApi}`, payload, {
