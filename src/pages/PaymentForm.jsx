@@ -64,7 +64,7 @@ const PaymentForm = () => {
       planId: values.planId,
       amountPaid: values.membershipFee,
       paymentFor: "plan",
-      paymentMethod: "CASH",
+      paymentMethod: values.paymentMethod,
       monthFrom: values.monthFrom,
     };
 
@@ -979,7 +979,6 @@ const PaymentForm = () => {
                           type="radio"
                           name="paymentMethod"
                           value="UPI"
-                          defaultValue
                           onChange={formik.handleChange}
                           className="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600"
                         />
@@ -1008,7 +1007,6 @@ const PaymentForm = () => {
                           aria-describedby="paypal-text"
                           type="radio"
                           name="paymentMethod"
-                          defaultValue
                           value="BANK_TRANSFER"
                           onChange={formik.handleChange}
                           className="h-4 w-4 border-gray-300 bg-white text-primary-600 focus:ring-2 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-primary-600"
