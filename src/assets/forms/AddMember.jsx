@@ -123,12 +123,14 @@ const AddMember = ({
         "You must agree with our terms and conditions"
       ),
       photo: Yup.mixed()
-        .required("Please upload member photo")
+        .nullable()
         .test("fileType", "Only JPG/PNG files are allowed", (value) => {
-          return value && SUPPORTED_FORMATS.includes(value.type);
+          if (!value) return true; // Allow null or undefined
+          return SUPPORTED_FORMATS.includes(value.type);
         })
         .test("fileSize", "File size too large (max 2MB)", (value) => {
-          return value && value.size <= 2 * 1024 * 1024; // 2MB
+          if (!value) return true; // Allow null or undefined
+          return value.size <= 2 * 1024 * 1024; // 2MB
         }),
       discount: Yup.number().max(100),
     }),
@@ -163,8 +165,8 @@ const AddMember = ({
           }
         });
     } catch (error) {
-      if (error.errors) {
-        handleValidation(error.errors);
+      if (error.isAxiosError) {
+        handleValidation(error.response.data.errors);
       } else {
         ErrorToast.show(error);
       }
@@ -197,7 +199,7 @@ const AddMember = ({
       formik.setFieldValue("membershipFee", membershipFeePerMonth);
       formik.setFieldValue("netAmt", netAmt);
       formik.setFieldValue("payableAmt", payableAmt);
-      formik.setFieldValue("arrear", arrear);
+      // formik.setFieldValue("arrear", arrear);
     }
   }, [formik.values.isPayment, formik.values.planId, formik.values.discount]);
 
@@ -809,23 +811,6 @@ const AddMember = ({
                       id="payableAmt"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                       value={formik.values.payableAmt}
-                      readOnly
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label
-                      htmlFor="arrear"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Arrear
-                    </label>
-                    <input
-                      type="text"
-                      name="arrear"
-                      id="arrear"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                      value={formik.values.arrear}
                       readOnly
                     />
                   </div>
