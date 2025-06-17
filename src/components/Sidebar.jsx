@@ -35,7 +35,7 @@ const Sidebar = () => {
         {
           menuName: "Plans",
           fontIcon: null,
-          menuRoute: "#",
+          menuRoute: "/plans",
           isParent: false,
         },
       ],

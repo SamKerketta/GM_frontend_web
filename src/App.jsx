@@ -15,6 +15,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import Transactions from "./pages/Transactions";
 import AddMember from "./assets/forms/AddMember";
 import Profile from "./pages/Profile";
+import Plans from "./pages/Plans";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/plans" element={<Plans />} />
           </Route>
         </Routes>
       </Router>
