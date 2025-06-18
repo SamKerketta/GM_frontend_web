@@ -5,19 +5,44 @@ import { API_BASE_URL, AUTH_TOKEN } from "../config/utilities";
 import axios from "axios";
 import ErrorToast from "../components/ErrorToast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom";
 import {
   faDumbbell,
   faPenToSquare,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { Button, ButtonGroup } from "flowbite-react";
-import { width } from "@fortawesome/free-solid-svg-icons/faUsers";
+import {
+  Button,
+  ButtonGroup,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "flowbite-react";
+import { useFormik } from "formik";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import TextField from "@mui/material/TextField";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 const Plans = () => {
   const [loader, setLoader] = useState(false);
   const aPlansList = API_BASE_URL + "/crud/plans/list";
   const [plansList, setPlansList] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+
+  const formik = useFormik({
+    initialValues: {
+      planName: "",
+      duration: 1,
+      price: "",
+      description: "",
+      admissionFee: "",
+    },
+  });
 
   useEffect(() => {
     fetchPlansList();
@@ -80,7 +105,7 @@ const Plans = () => {
     },
     {
       name: "Gym Fee",
-      selector: (row, index) => 500,
+      selector: (row, index) => row.admission_fee,
       sortable: true,
       width: "300px",
     },
@@ -91,7 +116,7 @@ const Plans = () => {
       cell: (row) => (
         <div className="flex gap-1 m-2">
           <ButtonGroup>
-            <Button color="alternative">
+            <Button color="alternative" onClick={() => setOpenModal(true)}>
               <FontAwesomeIcon icon={faPenToSquare} className="text-blue-500" />
             </Button>
             <Button color="alternative">
@@ -107,12 +132,12 @@ const Plans = () => {
       <div class="grid grid-cols-12 gap-4">
         {/* Add Plans Option */}
         <div class="col-span-3">
-          <Link
-            to="/add-member"
+          <Button
             class="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+            onClick={() => setOpenModal(true)}
           >
             <FontAwesomeIcon icon={faDumbbell} /> Add Plans
-          </Link>
+          </Button>
         </div>
         {/* Add Plans Option */}
 
@@ -136,6 +161,46 @@ const Plans = () => {
             progressComponent={<WidgetLoader />}
           />
         </div>
+
+        <Dialog
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          fullWidth
+          maxWidth="sm" // Options: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false
+          slotProps={{
+            paper: {
+              component: "form",
+              onSubmit: (event) => {
+                event.preventDefault();
+                const formData = new FormData(event.currentTarget);
+                const formJson = Object.fromEntries(formData.entries());
+                const email = formJson.email;
+                console.log(email);
+                setOpenModal(false);
+              },
+            },
+          }}
+        >
+          <DialogTitle>Add Plans</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Add Your Membership Plan</DialogContentText>
+            <TextField
+              autoFocus
+              required
+              margin="dense"
+              id="planName"
+              name="planName"
+              label="Plan Name"
+              type="text"
+              fullWidth
+              variant="standard"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenModal(false)}>Cancel</Button>
+            <Button type="submit">Submit</Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </>
   );

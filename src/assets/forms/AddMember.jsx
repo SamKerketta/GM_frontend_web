@@ -191,7 +191,7 @@ const AddMember = ({
   // Payment Calculation
   useEffect(() => {
     if (formik.values.isPayment && formik.values.discount <= 100) {
-      const admissionFee = formik.values.isAdmitFee == 1 ? ADMITION_FEE : 0;
+      const admissionFee = Number(formik.values.admissionFee);
       const membershipFeePerMonth = Number(formik.values.membershipFee); // Vary as per Plan
       const netAmt = admissionFee + membershipFeePerMonth;
       const discount = (netAmt * formik.values.discount) / 100;
@@ -467,13 +467,13 @@ const AddMember = ({
                     const duration =
                       selectedOption.getAttribute("data-duration");
                     const price = selectedOption.getAttribute("data-price");
-                    const isAdmitFee =
-                      selectedOption.getAttribute("data-isadmitfee");
+                    const admissionFee =
+                      selectedOption.getAttribute("data-admissionfee");
 
                     formik.setFieldValue("planId", e.target.value);
                     formik.setFieldValue("durationInMonths", duration);
                     formik.setFieldValue("membershipFee", price);
-                    formik.setFieldValue("isAdmitFee", isAdmitFee);
+                    formik.setFieldValue("admissionFee", admissionFee);
                   }}
                   value={formik.values.planId}
                   onBlur={formik.handleBlur}
@@ -483,7 +483,7 @@ const AddMember = ({
                     <option
                       data-duration={plan.duration}
                       data-price={plan.price}
-                      data-isadmitfee={plan.is_admission_fee_required}
+                      data-admissionfee={plan.admission_fee}
                       value={plan.id}
                     >
                       {plan.plan_name}
