@@ -27,12 +27,20 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Input from "@mui/material/Input";
+import InputAdornment from "@mui/material/InputAdornment";
 
 const Plans = () => {
   const [loader, setLoader] = useState(false);
   const aPlansList = API_BASE_URL + "/crud/plans/list";
   const [plansList, setPlansList] = useState([]);
   const [openModal, setOpenModal] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+
+  const increase = () => setQuantity(prev => prev + 1);
+  const decrease = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
   const formik = useFormik({
     initialValues: {
@@ -195,6 +203,32 @@ const Plans = () => {
               fullWidth
               variant="standard"
             />
+            <TextField
+              required
+              margin="dense"
+              id="price"
+              name="price"
+              label="Plan Price"
+              type="text"
+              fullWidth
+              variant="standard"
+            />
+
+            <div className="flex items-center space-x-2 mt-3">
+              <Button color="gray" size="md" onClick={decrease}>-</Button>
+              <FormControl sx={{ m: 1 }} variant="standard">
+                <InputLabel htmlFor="standard-adornment-amount">Plan Price</InputLabel>
+                <Input
+                  id="standard-adornment-amount"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  startAdornment={<InputAdornment position="start">₹</InputAdornment>}
+                />
+              </FormControl>
+              <Button color="gray" size="md" onClick={increase}>+</Button>
+            </div>
+
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenModal(false)}>Cancel</Button>
