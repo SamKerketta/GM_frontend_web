@@ -25,12 +25,16 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
+import { Box, FormHelperText } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Input from "@mui/material/Input";
 import InputAdornment from "@mui/material/InputAdornment";
+import * as Yup from "yup";
+import SuccessToast from "../components/SuccessToast";
+import { handleValidation } from "../Services/Utils";
 
 const Plans = () => {
   const [loader, setLoader] = useState(false);
@@ -39,16 +43,32 @@ const Plans = () => {
   const [openModal, setOpenModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const increase = () => setQuantity(prev => prev + 1);
-  const decrease = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
-
   const formik = useFormik({
     initialValues: {
       planName: "",
       duration: 1,
       price: "",
       description: "",
-      admissionFee: "",
+      admissionFee: 0,
+    },
+    validationSchema: Yup.object({
+      planName: Yup.string().required("Please Enter This Field"),
+      description: Yup.string().nullable(),
+      price: Yup.number()
+        .required("Please Enter The Price")
+        .min(1)
+        .typeError("Please enter a valid number"), // for non-numeric strings,
+      admissionFee: Yup.number()
+        .required("Please Enter The Price")
+        .min(0)
+        .typeError("Please enter a valid number"), // for non-numeric strings,,
+      duration: Yup.number("Please Enter a valid duration")
+        .required("Please Enter This Field")
+        .min(0)
+        .typeError("Please enter a valid number"), // for non-numeric strings,,
+    }),
+    onSubmit: (values, { resetForm }) => {
+      submitPlan(values);
     },
   });
 
@@ -135,6 +155,54 @@ const Plans = () => {
       ),
     },
   ];
+
+  const increase = () => {
+    const changedValue = Number(formik.values.duration) + 1;
+    formik.setFieldValue("duration", changedValue);
+  };
+
+  const decrease = () => {
+    const changedValue =
+      Number(formik.values.duration) > 1
+        ? Number(formik.values.duration) - 1
+        : 1;
+    formik.setFieldValue("duration", changedValue);
+  };
+
+  const submitPlan = async (payload) => {
+    setLoader(true);
+    try {
+      const response = await axios.post(
+        API_BASE_URL + "/crud/plans/add",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+          },
+        }
+      );
+      if (response.status == 200) {
+        if (response.data.status) {
+          SuccessToast.show(response.data.message);
+        } else {
+          throw response.data.message;
+        }
+      }
+
+      if (response.status != 200) {
+        throw "Something Went Wrong";
+      }
+    } catch (error) {
+      if (error.isAxiosError) {
+        handleValidation(error.response.data.errors);
+      } else {
+        ErrorToast.show(error);
+      }
+    } finally {
+      setLoader(false);
+    }
+  };
+
   return (
     <>
       <div class="grid grid-cols-12 gap-4">
@@ -180,11 +248,7 @@ const Plans = () => {
               component: "form",
               onSubmit: (event) => {
                 event.preventDefault();
-                const formData = new FormData(event.currentTarget);
-                const formJson = Object.fromEntries(formData.entries());
-                const email = formJson.email;
-                console.log(email);
-                setOpenModal(false);
+                formik.handleSubmit();
               },
             },
           }}
@@ -192,9 +256,10 @@ const Plans = () => {
           <DialogTitle>Add Plans</DialogTitle>
           <DialogContent>
             <DialogContentText>Add Your Membership Plan</DialogContentText>
+            {/* <form onSubmit={formik.handleSubmit}> */}
             <TextField
+              error={formik.touched.planName && Boolean(formik.errors.planName)}
               autoFocus
-              required
               margin="dense"
               id="planName"
               name="planName"
@@ -202,37 +267,151 @@ const Plans = () => {
               type="text"
               fullWidth
               variant="standard"
+              value={formik.values.planName}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              helperText={
+                formik.touched.planName && Boolean(formik.errors.planName)
+                  ? formik.errors.planName
+                  : ""
+              }
             />
             <TextField
-              required
               margin="dense"
-              id="price"
-              name="price"
-              label="Plan Price"
+              id="description"
+              name="description"
+              label="Description"
               type="text"
               fullWidth
               variant="standard"
+              error={
+                formik.touched.description && Boolean(formik.errors.description)
+              }
+              helperText={
+                formik.touched.description && Boolean(formik.errors.description)
+                  ? formik.errors.description
+                  : ""
+              }
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.description}
             />
+            <Box display="flex" gap={2}>
+              <TextField
+                margin="dense"
+                id="price"
+                name="price"
+                label="Plan Price"
+                type="text"
+                fullWidth
+                variant="standard"
+                sx={{ flex: 1 }}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={formik.touched.price && Boolean(formik.errors.price)}
+                helperText={
+                  formik.touched.price && Boolean(formik.errors.price)
+                    ? formik.errors.price
+                    : ""
+                }
+                value={formik.values.price}
+              />
+              <TextField
+                margin="dense"
+                id="admissionFee"
+                name="admissionFee"
+                label="Admission Fee"
+                type="text"
+                fullWidth
+                variant="standard"
+                sx={{ flex: 1 }}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={
+                  formik.touched.admissionFee &&
+                  Boolean(formik.errors.admissionFee)
+                }
+                helperText={
+                  formik.touched.admissionFee &&
+                  Boolean(formik.errors.admissionFee)
+                    ? formik.errors.admissionFee
+                    : ""
+                }
+                value={formik.values.admissionFee}
+              />
+            </Box>
 
             <div className="flex items-center space-x-2 mt-3">
-              <Button color="gray" size="md" onClick={decrease}>-</Button>
-              <FormControl sx={{ m: 1 }} variant="standard">
-                <InputLabel htmlFor="standard-adornment-amount">Plan Price</InputLabel>
+              <Button
+                className="text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900 mt-3"
+                size="md"
+                onClick={decrease}
+              >
+                -
+              </Button>
+              <FormControl
+                className="w-[20%]"
+                sx={{ m: 1 }}
+                variant="standard"
+                error={
+                  formik.touched.duration && Boolean(formik.errors.duration)
+                }
+              >
+                <InputLabel htmlFor="duration">
+                  Duration(<span className="text-yellow-400">In Months</span>)
+                </InputLabel>
                 <Input
-                  id="standard-adornment-amount"
+                  id="duration"
+                  name="duration"
                   min="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
-                  startAdornment={<InputAdornment position="start">₹</InputAdornment>}
+                  value={formik.values.duration}
+                  onChange={
+                    ((e) => setQuantity(Number(e.target.value)),
+                    formik.handleChange)
+                  }
+                  startAdornment={
+                    <InputAdornment position="start">₹</InputAdornment>
+                  }
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.duration && Boolean(formik.errors.duration)
+                  }
+                  helperText={
+                    formik.touched.duration && Boolean(formik.errors.duration)
+                      ? formik.errors.duration
+                      : ""
+                  }
                 />
+                {formik.touched.duration && formik.errors.duration && (
+                  <FormHelperText className="text-red-600">
+                    {formik.errors.duration}
+                  </FormHelperText>
+                )}
               </FormControl>
-              <Button color="gray" size="md" onClick={increase}>+</Button>
+              <Button
+                className="text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900 mt-3"
+                size="md"
+                onClick={increase}
+              >
+                +
+              </Button>
             </div>
-
+            {/* </form> */}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenModal(false)}>Cancel</Button>
-            <Button type="submit">Submit</Button>
+            <Button
+              className="py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+              onClick={() => setOpenModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+              type="submit"
+              disabled={loader}
+            >
+              Submit
+            </Button>
           </DialogActions>
         </Dialog>
       </div>
