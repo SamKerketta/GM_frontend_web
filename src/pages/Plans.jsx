@@ -82,6 +82,12 @@ const Plans = () => {
     fetchPlansList();
   }, []);
 
+  useEffect(() => {
+    if (openModal === false) {
+      formik.resetForm();
+    }
+  }, [openModal]);
+
   const fetchPlansList = async () => {
     setLoader(true);
     try {
