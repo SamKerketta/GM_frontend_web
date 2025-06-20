@@ -47,14 +47,14 @@ const Sidebar = () => {
       menuId: 3,
       menuName: "Setting",
       fontIcon: null,
-      menuRoute: "setting",
+      menuRoute: "#",
       isParent: false,
     },
     {
       menuId: 5,
       menuName: "Help",
       fontIcon: null,
-      menuRoute: "help",
+      menuRoute: "#",
       isParent: false,
     },
   ];
