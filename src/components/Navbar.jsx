@@ -68,7 +68,9 @@ const Navbar = () => {
             <DropdownItem>
               <Link to="/">Dashboard</Link>
             </DropdownItem>
-            <DropdownItem>Profile</DropdownItem>
+            <DropdownItem>
+              <Link to="/profile">Profile</Link>
+            </DropdownItem>
             <DropdownDivider />
             <DropdownItem onClick={handleLogout}>Sign out</DropdownItem>
           </Dropdown>

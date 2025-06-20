@@ -117,7 +117,7 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
                 {GYM_NAME}
               </h3>
               <p className="text-sm text-gray-500 dark:text-neutral-500">
-                Invoice # {receiptDtls.invoice_no}
+                Invoice # {receiptDtls?.invoice_no}
               </p>
             </div>
             {/* Grid */}
@@ -128,7 +128,7 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
                 </span>
                 <span className="block text-sm font-medium text-gray-800 dark:text-neutral-200">
                   {CURRENCY}
-                  {receiptDtls.amount_paid}
+                  {receiptDtls?.amount_paid}
                 </span>
               </div>
               {/* End Col */}
@@ -137,8 +137,8 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
                   Date paid:
                 </span>
                 <span className="block text-sm font-medium text-gray-800 dark:text-neutral-200">
-                  {dmyToLongForm(receiptDtls.payment_date)}{" "}
-                  {receiptDtls.payment_time}
+                  {dmyToLongForm(receiptDtls?.payment_date)}{" "}
+                  {receiptDtls?.payment_time}
                 </span>
               </div>
               {/* End Col */}
@@ -173,7 +173,7 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
                     </defs>
                   </svg>
                   <span className="block text-sm font-medium text-gray-800 dark:text-neutral-200">
-                    {receiptDtls.payment_method}
+                    {receiptDtls?.payment_method}
                   </span>
                 </div>
               </div>
@@ -188,33 +188,33 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                   <div className="flex items-center justify-between w-full">
                     <span>Receipient Name</span>
-                    <span>{receiptDtls.name}</span>
+                    <span>{receiptDtls?.name}</span>
                   </div>
                 </li>
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                   <div className="flex items-center justify-between w-full">
                     <span>Mobile No</span>
-                    <span>{receiptDtls.phone}</span>
+                    <span>{receiptDtls?.phone}</span>
                   </div>
                 </li>
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                   <div className="flex items-center justify-between w-full">
                     <span>Plan Acquired</span>
                     <span>
-                      {receiptDtls.plan_name} ({receiptDtls.duration})
+                      {receiptDtls?.plan_name} ({receiptDtls?.duration})
                     </span>
                   </div>
                 </li>
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                   <div className="flex items-center justify-between w-full">
                     <span>Valid From</span>
-                    <span> {dmyToLongForm(receiptDtls.month_from)}</span>
+                    <span> {dmyToLongForm(receiptDtls?.month_from)}</span>
                   </div>
                 </li>
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                   <div className="flex items-center justify-between w-full">
                     <span>Valid To</span>
-                    <span>{dmyToLongForm(receiptDtls.month_till)}</span>
+                    <span>{dmyToLongForm(receiptDtls?.month_till)}</span>
                   </div>
                 </li>
                 <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200">
@@ -222,7 +222,7 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
                     <span>Amount paid</span>
                     <span>
                       {CURRENCY}
-                      {receiptDtls.amount_paid}
+                      {receiptDtls?.amount_paid}
                     </span>
                   </div>
                 </li>
