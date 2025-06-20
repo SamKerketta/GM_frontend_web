@@ -39,9 +39,15 @@ import { handleValidation } from "../Services/Utils";
 const Plans = () => {
   const [loader, setLoader] = useState(false);
   const aPlansList = API_BASE_URL + "/crud/plans/list";
+  const aAddPlan = API_BASE_URL + "/crud/plans/add";
+  const aEditPlan = API_BASE_URL + "/crud/plans/update";
+  const aDeletePlan = API_BASE_URL + "/crud/plans/delete";
   const [plansList, setPlansList] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [isEditModal, setIsEditModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteItems, setDeleteItems] = useState({ id: null, planName: "" });
 
   const formik = useFormik({
     initialValues: {
@@ -68,7 +74,7 @@ const Plans = () => {
         .typeError("Please enter a valid number"), // for non-numeric strings,,
     }),
     onSubmit: (values, { resetForm }) => {
-      submitPlan(values);
+      submitPlan(values, resetForm);
     },
   });
 
@@ -132,7 +138,7 @@ const Plans = () => {
       width: "300px",
     },
     {
-      name: "Gym Fee",
+      name: "Admission Fee",
       selector: (row, index) => row.admission_fee,
       sortable: true,
       width: "300px",
@@ -144,10 +150,29 @@ const Plans = () => {
       cell: (row) => (
         <div className="flex gap-1 m-2">
           <ButtonGroup>
-            <Button color="alternative" onClick={() => setOpenModal(true)}>
+            <Button
+              color="alternative"
+              onClick={() => {
+                setOpenModal(true);
+                setIsEditModal(true);
+                formik.setFieldValue("id", row.id);
+                formik.setFieldValue("planName", row.plan_name);
+                formik.setFieldValue("duration", row.duration);
+                formik.setFieldValue("price", row.price);
+                formik.setFieldValue("description", row.description);
+                formik.setFieldValue("admissionFee", row.admission_fee);
+              }}
+            >
               <FontAwesomeIcon icon={faPenToSquare} className="text-blue-500" />
             </Button>
-            <Button color="alternative">
+            <Button
+              color="alternative"
+              onClick={() => {
+                setDeleteModal(true);
+                const selected = { id: row.id, planName: row.plan_name };
+                setDeleteItems(selected);
+              }}
+            >
               <FontAwesomeIcon icon={faTrash} className="text-red-500" />
             </Button>
           </ButtonGroup>
@@ -169,12 +194,48 @@ const Plans = () => {
     formik.setFieldValue("duration", changedValue);
   };
 
-  const submitPlan = async (payload) => {
+  const submitPlan = async (payload, resetForm) => {
+    setLoader(true);
+    const url = isEditModal ? aEditPlan : aAddPlan;
+    try {
+      const response = await axios.post(url, payload, {
+        headers: {
+          Authorization: `Bearer ${AUTH_TOKEN}`,
+        },
+      });
+      if (response.status == 200) {
+        if (response.data.status) {
+          SuccessToast.show(response.data.message);
+          fetchPlansList();
+          setOpenModal(false);
+          resetForm();
+        } else {
+          throw response.data.message;
+        }
+      }
+
+      if (response.status != 200) {
+        throw "Something Went Wrong";
+      }
+    } catch (error) {
+      if (error.isAxiosError) {
+        handleValidation(error.response.data.errors);
+      } else {
+        ErrorToast.show(error);
+      }
+    } finally {
+      setLoader(false);
+    }
+  };
+
+  const submitDeletion = async () => {
     setLoader(true);
     try {
       const response = await axios.post(
-        API_BASE_URL + "/crud/plans/add",
-        payload,
+        aDeletePlan,
+        {
+          id: deleteItems.id,
+        },
         {
           headers: {
             Authorization: `Bearer ${AUTH_TOKEN}`,
@@ -184,6 +245,8 @@ const Plans = () => {
       if (response.status == 200) {
         if (response.data.status) {
           SuccessToast.show(response.data.message);
+          fetchPlansList();
+          setDeleteModal(false);
         } else {
           throw response.data.message;
         }
@@ -253,10 +316,11 @@ const Plans = () => {
             },
           }}
         >
-          <DialogTitle>Add Plans</DialogTitle>
+          <DialogTitle> {isEditModal ? "Edit Plan" : "Add Plans"} </DialogTitle>
           <DialogContent>
-            <DialogContentText>Add Your Membership Plan</DialogContentText>
-            {/* <form onSubmit={formik.handleSubmit}> */}
+            <DialogContentText>
+              {isEditModal ? "Edit" : "Add"} Your Membership Plan
+            </DialogContentText>
             <TextField
               error={formik.touched.planName && Boolean(formik.errors.planName)}
               autoFocus
@@ -396,7 +460,6 @@ const Plans = () => {
                 +
               </Button>
             </div>
-            {/* </form> */}
           </DialogContent>
           <DialogActions>
             <Button
@@ -414,6 +477,40 @@ const Plans = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Delete Modal */}
+        <Modal
+          show={deleteModal}
+          size="md"
+          onClose={() => setDeleteModal(false)}
+          popup
+        >
+          <ModalHeader />
+          <ModalBody>
+            <div className="text-center">
+              <FontAwesomeIcon
+                icon={faTrash}
+                className="text-red-600 text-2xl"
+              />
+              <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                Are you sure you want to delete Plan{" "}
+                <b>{deleteItems.planName}</b> ?
+              </h3>
+              <div className="flex justify-center gap-4">
+                <Button color="red" onClick={() => submitDeletion()}>
+                  Yes, I'm sure
+                </Button>
+                <Button
+                  color="alternative"
+                  disabled={loader}
+                  onClick={() => setDeleteModal(false)}
+                >
+                  No, cancel
+                </Button>
+              </div>
+            </div>
+          </ModalBody>
+        </Modal>
       </div>
     </>
   );
