@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import AreaChart from "../components/AreaChart";
 import PieChart from "../components/PieChart";
-import LineChart from "../components/LineChart";
+// import LineChart from "../components/LineChart";
 import BarChart from "../components/BarChart";
 import axios from "axios";
 import { API_BASE_URL, AUTH_TOKEN } from "../config/utilities";
@@ -91,7 +91,7 @@ const Home = () => {
             <PieChart chartData={pieChartData} />
           </div>
           <div className="col-span-4">
-            <LineChart chartData={lineChartData} />
+            {/* <LineChart chartData={lineChartData} /> */}
           </div>
           <div className="col-span-6">
             <BarChart chartData={barChartData} />
