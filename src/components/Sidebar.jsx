@@ -27,10 +27,10 @@ const Sidebar = () => {
     },
     {
       menuId: 4,
-      menuName: "Masters",
+      menuName: "Plans",
       fontIcon: null,
-      menuRoute: "#",
-      isParent: true,
+      menuRoute: "/plans",
+      isParent: false,
       child: [
         {
           menuName: "Plans",

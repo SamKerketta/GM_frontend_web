@@ -85,6 +85,8 @@ const AddMember = ({
       netAmt: 0,
       discount: 0,
       paymentMethod: "CASH",
+      isPartialPayment: false,
+      releasedPayment: 0,
     },
     validationSchema: Yup.object({
       name: Yup.string()
@@ -133,7 +135,22 @@ const AddMember = ({
           if (!value) return true; // Allow null or undefined
           return value.size <= 2 * 1024 * 1024; // 2MB
         }),
-      discount: Yup.number().max(100),
+      discount: Yup.number().test(
+        "is-less-than-netAmt",
+        "Discount must be less than Net Amount",
+        function (value) {
+          const { netAmt } = this.parent;
+          return value == null || Number(value) < Number(netAmt);
+        }
+      ),
+      releasedPayment: Yup.number().test(
+        "is-less-than-payableAmt",
+        "Released must be less than Payable Amount",
+        function (value) {
+          const { payableAmt } = this.parent;
+          return value == null || Number(value) < Number(payableAmt);
+        }
+      ),
     }),
     onSubmit: (values, { resetForm }) => {
       submitMember(values, resetForm);
@@ -190,19 +207,17 @@ const AddMember = ({
 
   // Payment Calculation
   useEffect(() => {
-    if (formik.values.isPayment && formik.values.discount <= 100) {
+    if (formik.values.isPayment) {
       const admissionFee = Number(formik.values.admissionFee);
       const membershipFeePerMonth = Number(formik.values.membershipFee); // Vary as per Plan
       const netAmt = admissionFee + membershipFeePerMonth;
-      const discount = (netAmt * formik.values.discount) / 100;
+      const discount = formik.values.discount;
       const payableAmt = Math.round(netAmt - discount);
-      const arrear = netAmt - payableAmt;
 
       formik.setFieldValue("admissionFee", admissionFee);
       formik.setFieldValue("membershipFee", membershipFeePerMonth);
       formik.setFieldValue("netAmt", netAmt);
       formik.setFieldValue("payableAmt", payableAmt);
-      // formik.setFieldValue("arrear", arrear);
     }
   }, [formik.values.isPayment, formik.values.planId, formik.values.discount]);
 
@@ -217,6 +232,12 @@ const AddMember = ({
     console.log(discountPerc);
     // formik.setFieldValue("discount", discountPerc);
   }, [formik.values.payableAmt]);
+
+  // Calculate Arrear Amount
+  const calculateArrear = (e) => {
+    const arrear = formik.values.payableAmt - e.target.value;
+    formik.setFieldValue("arrear", arrear);
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -777,16 +798,30 @@ const AddMember = ({
                   <div className="col-span-2">
                     <label
                       htmlFor="discount"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      className={`block mb-2 text-sm font-medium
+                                                ${
+                                                  formik.touched.discount &&
+                                                  formik.errors.discount
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
+                                                    `}
                     >
                       Discount
-                      <span className="text-red-700"> (In Perc.)</span>
+                      <span className="text-red-700"> (₹)</span>
                     </label>
                     <input
                       type="text"
                       name="discount"
                       id="discount"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      className={`border text-sm rounded-lg block w-full p-2.5
+                                                ${
+                                                  formik.touched.discount &&
+                                                  formik.errors.discount
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
+                                                    `}
                       value={formik.values.discount}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
@@ -817,6 +852,99 @@ const AddMember = ({
                       readOnly
                     />
                   </div>
+                  {/* Partial Payment */}
+                  <div className="col-span-4 mt-5">
+                    <input
+                      id="isPartialPayment"
+                      type="checkbox"
+                      defaultValue
+                      className="mt-5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      onChange={formik.handleChange}
+                      checked={formik.values.isPartialPayment}
+                    />
+
+                    <label
+                      htmlFor="isPartialPayment"
+                      className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    >
+                      Would You Like to Make a Partial Payment?
+                    </label>
+                    {formik.touched.isPartialPayment &&
+                    formik.errors.isPartialPayment ? (
+                      <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                        <span className="font-medium">
+                          {formik.errors.isPartialPayment}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {formik.values.isPartialPayment ? (
+                    <>
+                      <div className="col-span-2">
+                        <label
+                          htmlFor="releasedPayment"
+                          className={`block mb-2 text-sm font-medium
+                                                ${
+                                                  formik.touched
+                                                    .releasedPayment &&
+                                                  formik.errors.releasedPayment
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
+                                                    `}
+                        >
+                          Amount To Be Released
+                        </label>
+                        <input
+                          type="text"
+                          name="releasedPayment"
+                          id="releasedPayment"
+                          className={`border text-sm rounded-lg block w-full p-2.5
+                                                ${
+                                                  formik.touched
+                                                    .releasedPayment &&
+                                                  formik.errors.releasedPayment
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
+                                                    `}
+                          value={formik.values.releasedPayment}
+                          readOnly={!isPartialPayment}
+                          onChange={(e) => {
+                            formik.handleChange(e);
+                            calculateArrear(e);
+                          }}
+                          onBlur={formik.handleBlur}
+                        />
+                        {formik.touched.releasedPayment &&
+                        formik.errors.releasedPayment ? (
+                          <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                            <span className="font-medium">
+                              {formik.errors.releasedPayment}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="col-span-2">
+                        <label
+                          htmlFor="arrear"
+                          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Arrear
+                        </label>
+                        <input
+                          type="text"
+                          name="arrear"
+                          id="arrear"
+                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                          value={formik.values.arrear}
+                          readOnly
+                        />
+                      </div>
+                    </>
+                  ) : null}
+                  {/* Partial Payment */}
                 </>
               ) : null}
 
