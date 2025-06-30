@@ -1,9 +1,8 @@
-export const API_BASE_URL = 'http://65.0.73.240:8001/api';
-export const GYM_NAME = 'Gravity Unisex Fitness Club';
-export const GYM_EMAIL = 'info@gravityfintness.com';
-export const GYM_CONTACT = '+91 0123456789';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const GYM_NAME = import.meta.env.VITE_GYM_NAME;
+export const GYM_EMAIL = import.meta.env.VITE_GYM_EMAIL;
+export const GYM_CONTACT = import.meta.env.VITE_GYM_CONTACT;
 export const CURRENT_DATE = new Date().toISOString().split('T')[0];
-export const ADMITION_FEE = 200;
 export const CURRENCY = '₹';
 export const AUTH_TOKEN = localStorage.getItem("authToken");
 export const SHIFTS = [
