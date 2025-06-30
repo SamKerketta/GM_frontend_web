@@ -13,7 +13,7 @@ export function dmyToYmd(dateStr){
 }
 
 // 
-export function getEndingDateByPlanId(membershipStart,planId,duration){
+export async function getEndingDateByPlanId(membershipStart,planId,duration){
     if (membershipStart && planId) {
       const addMonths = duration; // Do here dynamication as per plan
       const start = new Date(membershipStart);

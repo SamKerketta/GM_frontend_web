@@ -38,7 +38,8 @@ const PaymentForm = () => {
         ? dmyToYmd(memberDtl.membership_end)
         : CURRENT_DATE,
       expiringOn: null,
-      durationInMonths: 0,
+      durationInMonths: plans.find((plan) => plan.id === memberDtl.plan_id)
+        ?.duration,
       membershipFee: plans.find((plan) => plan.id === memberDtl.plan_id)?.price,
       paymentMethod: "CASH",
     },
@@ -55,7 +56,6 @@ const PaymentForm = () => {
   });
 
   const submitPayment = async (values, resetForm) => {
-    console.log(values);
     setLoader(true);
     const apiUrl = `${API_BASE_URL}/payment/offline`;
     const token = localStorage.getItem("authToken");
@@ -120,6 +120,7 @@ const PaymentForm = () => {
       formik.values.planId,
       formik.values.durationInMonths
     );
+    console.log("expiring on Date " + formik.values.durationInMonths);
     formik.setFieldValue("expiringOn", formattedlaterDate);
     setTotal(formik.values.membershipFee);
   };
