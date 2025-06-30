@@ -13,7 +13,6 @@ import { useFormik } from "formik";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import {
-  ADMITION_FEE,
   API_BASE_URL,
   AUTH_TOKEN,
   CURRENT_DATE,
