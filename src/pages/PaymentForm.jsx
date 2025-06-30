@@ -122,6 +122,18 @@ const PaymentForm = () => {
     calculationPayments();
   }, [formik.values.planId, formik.values.monthFrom, formik.values.discount]);
 
+  // handle of only Arrear payment
+  useEffect(() => {
+    if (formik.values.isArrear) {
+      formik.setFieldValue("isPartialPayment", false);
+      formik.setFieldValue("discount", 0);
+      formik.setFieldValue("releasedPayment", 0);
+      formik.setFieldValue("pendingAmt", 0);
+      formik.setFieldValue("payableAmt", 0);
+      formik.setFieldValue("planId", null);
+    }
+  }, [formik.values.isArrear]);
+
   // Calculation of Payments
   const calculationPayments = async () => {
     const formattedlaterDate = await getEndingDateByPlanId(
@@ -138,7 +150,8 @@ const PaymentForm = () => {
       Number(netAmt) -
       Number(formik.values.discount);
     formik.setFieldValue("payableAmt", payableAmt);
-    formik.setFieldValue("releasedPayment", payableAmt);
+    const pendingAmt = payableAmt - formik.values.releasedPayment;
+    formik.setFieldValue("pendingAmt", pendingAmt);
   };
 
   // Calculate Arrear Amount
@@ -838,10 +851,12 @@ const PaymentForm = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="planId"
-                      className={`block mb-2 text-sm font-medium
+                  {formik.values.isArrear == false ? (
+                    <>
+                      <div>
+                        <label
+                          htmlFor="planId"
+                          className={`block mb-2 text-sm font-medium
                                                 ${
                                                   formik.touched.planId &&
                                                   formik.errors.planId
@@ -849,63 +864,64 @@ const PaymentForm = () => {
                                                     : "text-gray-900 dark:text-white"
                                                 }
                                                     `}
-                    >
-                      Select Plan
-                    </label>
-                    <select
-                      id="planId"
-                      className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${
-                                                  formik.touched.planId &&
-                                                  formik.errors.planId
-                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                                }
-                                                    `}
-                      onChange={(e) => {
-                        const selectedOption = e.target.selectedOptions[0];
-                        const duration =
-                          selectedOption.getAttribute("data-duration");
-                        const price = selectedOption.getAttribute("data-price");
-                        const isAdmitFee =
-                          selectedOption.getAttribute("data-isadmitfee");
-
-                        formik.setFieldValue("planId", e.target.value);
-                        formik.setFieldValue("durationInMonths", duration);
-                        formik.setFieldValue("membershipFee", price);
-                        formik.setFieldValue("isAdmitFee", isAdmitFee);
-                      }}
-                      value={formik.values.planId}
-                      onBlur={formik.handleBlur}
-                    >
-                      <option value="">Select Plan</option>
-                      {plans.map((plan) => (
-                        <option
-                          data-duration={plan.duration}
-                          data-price={plan.price}
-                          data-isadmitfee={plan.is_admission_fee_required}
-                          value={plan.id}
                         >
-                          {plan.plan_name}
-                          <span class="text-sm text-gray-500">
-                            ({plan.duration} In Months)
-                          </span>
-                        </option>
-                      ))}
-                    </select>
-                    {formik.touched.planId && formik.errors.planId ? (
-                      <div className="mt-2 text-sm text-red-600 dark:text-red-500">
-                        <span className="font-medium">
-                          {formik.errors.planId}
-                        </span>
-                      </div>
-                    ) : null}
-                  </div>
+                          Select Plan
+                        </label>
+                        <select
+                          id="planId"
+                          className={`border text-sm rounded-lg block w-full p-2.5
+                                                ${
+                                                  formik.touched.planId &&
+                                                  formik.errors.planId
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
+                                                    `}
+                          onChange={(e) => {
+                            const selectedOption = e.target.selectedOptions[0];
+                            const duration =
+                              selectedOption.getAttribute("data-duration");
+                            const price =
+                              selectedOption.getAttribute("data-price");
+                            const isAdmitFee =
+                              selectedOption.getAttribute("data-isadmitfee");
 
-                  <div>
-                    <label
-                      htmlFor="monthFrom"
-                      className={`block mb-2 text-sm font-medium
+                            formik.setFieldValue("planId", e.target.value);
+                            formik.setFieldValue("durationInMonths", duration);
+                            formik.setFieldValue("membershipFee", price);
+                            formik.setFieldValue("isAdmitFee", isAdmitFee);
+                          }}
+                          value={formik.values.planId}
+                          onBlur={formik.handleBlur}
+                        >
+                          <option value="">Select Plan</option>
+                          {plans.map((plan) => (
+                            <option
+                              data-duration={plan.duration}
+                              data-price={plan.price}
+                              data-isadmitfee={plan.is_admission_fee_required}
+                              value={plan.id}
+                            >
+                              {plan.plan_name}
+                              <span class="text-sm text-gray-500">
+                                ({plan.duration} In Months)
+                              </span>
+                            </option>
+                          ))}
+                        </select>
+                        {formik.touched.planId && formik.errors.planId ? (
+                          <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                            <span className="font-medium">
+                              {formik.errors.planId}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="monthFrom"
+                          className={`block mb-2 text-sm font-medium
                                                 ${
                                                   formik.touched.monthFrom &&
                                                   formik.errors.monthFrom
@@ -913,13 +929,13 @@ const PaymentForm = () => {
                                                     : "text-gray-900 dark:text-white"
                                                 }
                                                     `}
-                    >
-                      Starting From
-                    </label>
-                    <input
-                      type="date"
-                      id="monthFrom"
-                      className={`border text-sm rounded-lg block w-full p-2.5
+                        >
+                          Starting From
+                        </label>
+                        <input
+                          type="date"
+                          id="monthFrom"
+                          className={`border text-sm rounded-lg block w-full p-2.5
                                                 ${
                                                   formik.touched.monthFrom &&
                                                   formik.errors.monthFrom
@@ -927,36 +943,38 @@ const PaymentForm = () => {
                                                     : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                                                 }
                                                     `}
-                      placeholder=""
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      value={formik.values.monthFrom}
-                    />
+                          placeholder=""
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          value={formik.values.monthFrom}
+                        />
 
-                    {formik.touched.monthFrom && formik.errors.monthFrom ? (
-                      <div className="mt-2 text-sm text-red-600 dark:text-red-500">
-                        <span className="font-medium">
-                          {formik.errors.monthFrom}
-                        </span>
+                        {formik.touched.monthFrom && formik.errors.monthFrom ? (
+                          <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                            <span className="font-medium">
+                              {formik.errors.monthFrom}
+                            </span>
+                          </div>
+                        ) : null}
                       </div>
-                    ) : null}
-                  </div>
 
-                  <div>
-                    <label
-                      htmlFor="expiringOn"
-                      className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Expiring On
-                    </label>
-                    <input
-                      type="date"
-                      id="expiringOn"
-                      className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
-                      value={formik.values.expiringOn}
-                      readOnly
-                    />
-                  </div>
+                      <div>
+                        <label
+                          htmlFor="expiringOn"
+                          className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+                        >
+                          Expiring On
+                        </label>
+                        <input
+                          type="date"
+                          id="expiringOn"
+                          className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
+                          value={formik.values.expiringOn}
+                          readOnly
+                        />
+                      </div>
+                    </>
+                  ) : null}
 
                   <div className="grid grid-cols-3 gap-2">
                     <div className="col-span-1 mt-5">
@@ -1249,6 +1267,14 @@ const PaymentForm = () => {
                     </dt>
                     <dd className="text-base font-bold text-gray-900 dark:text-white">
                       ₹{Number(formik.values.payableAmt).toFixed(2) || 0.0}
+                    </dd>
+                  </dl>
+                  <dl className="flex items-center justify-between gap-4 py-3">
+                    <dt className="text-base font-bold text-gray-900 dark:text-white">
+                      Releasing Payment
+                    </dt>
+                    <dd className="text-base font-bold text-gray-900 dark:text-white">
+                      ₹{Number(formik.values.releasedPayment).toFixed(2) || 0.0}
                     </dd>
                   </dl>
 
