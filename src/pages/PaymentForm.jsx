@@ -1269,14 +1269,19 @@ const PaymentForm = () => {
                       ₹{Number(formik.values.payableAmt).toFixed(2) || 0.0}
                     </dd>
                   </dl>
-                  <dl className="flex items-center justify-between gap-4 py-3">
-                    <dt className="text-base font-bold text-gray-900 dark:text-white">
-                      Releasing Payment
-                    </dt>
-                    <dd className="text-base font-bold text-gray-900 dark:text-white">
-                      ₹{Number(formik.values.releasedPayment).toFixed(2) || 0.0}
-                    </dd>
-                  </dl>
+
+                  {formik.values.isPartialPayment ? (
+                    <dl className="flex items-center justify-between gap-4 py-3">
+                      <dt className="text-base font-bold text-gray-900 dark:text-white">
+                        Releasing Payment
+                      </dt>
+                      <dd className="text-base font-bold text-gray-900 dark:text-white">
+                        ₹
+                        {Number(formik.values.releasedPayment).toFixed(2) ||
+                          0.0}
+                      </dd>
+                    </dl>
+                  ) : null}
 
                   {formik.values.isPartialPayment ? (
                     <dl className="flex items-center justify-between gap-4 py-3">
