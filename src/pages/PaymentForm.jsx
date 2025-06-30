@@ -40,8 +40,17 @@ const PaymentForm = () => {
       expiringOn: null,
       durationInMonths: plans.find((plan) => plan.id === memberDtl.plan_id)
         ?.duration,
-      membershipFee: plans.find((plan) => plan.id === memberDtl.plan_id)?.price,
+      membershipFee: Number(
+        plans.find((plan) => plan.id === memberDtl.plan_id)?.price || 0
+      ).toFixed(0),
       paymentMethod: "CASH",
+      netAmt: 0,
+      discount: 0,
+      isPartialPayment: false,
+      releasedPayment: 0,
+      isArrear: false,
+      arrear: 0,
+      pendingAmt: 0,
     },
     validationSchema: Yup.object({
       planId: Yup.number()
@@ -111,7 +120,7 @@ const PaymentForm = () => {
 
   useEffect(() => {
     calculationPayments();
-  }, [formik.values.planId, formik.values.monthFrom]);
+  }, [formik.values.planId, formik.values.monthFrom, formik.values.discount]);
 
   // Calculation of Payments
   const calculationPayments = async () => {
@@ -122,7 +131,22 @@ const PaymentForm = () => {
     );
     console.log("expiring on Date " + formik.values.durationInMonths);
     formik.setFieldValue("expiringOn", formattedlaterDate);
-    setTotal(formik.values.membershipFee);
+    const netAmt = formik.values.membershipFee;
+    formik.setFieldValue("netAmt", netAmt);
+    const payableAmt =
+      Number(formik.values.arrear) +
+      Number(netAmt) -
+      Number(formik.values.discount);
+    formik.setFieldValue("payableAmt", payableAmt);
+    formik.setFieldValue("releasedPayment", payableAmt);
+  };
+
+  // Calculate Arrear Amount
+  const calculatePendingAmt = (e) => {
+    if (formik.values.isPartialPayment) {
+      const arrear = formik.values.payableAmt - e.target.value;
+      formik.setFieldValue("pendingAmt", arrear);
+    }
   };
 
   // Function to get member's details
@@ -148,7 +172,9 @@ const PaymentForm = () => {
           if (response.status === 200) {
             if (response.data.status === true) {
               setMemberDtl(response.data.data);
-              console.log(memberDtl);
+              if (response.data.data?.arrear > 0) {
+                formik.setFieldValue("isArrear", true);
+              }
             }
             if (response.data.status === false) {
               throw response.data.message;
@@ -931,6 +957,156 @@ const PaymentForm = () => {
                       readOnly
                     />
                   </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-1 mt-5">
+                      <input
+                        id="isArrear"
+                        type="checkbox"
+                        defaultValue
+                        className="mt-5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        onChange={formik.handleChange}
+                        checked={formik.values.isArrear}
+                      />
+
+                      <label
+                        htmlFor="isArrear"
+                        className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                      >
+                        Pay Only <span className="text-red-500">Arrear</span>
+                      </label>
+                      {formik.touched.isArrear && formik.errors.isArrear ? (
+                        <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                          <span className="font-medium">
+                            {formik.errors.isArrear}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {formik.values.isArrear == false ? (
+                      <div className="col-span-2 mt-5">
+                        <input
+                          id="isPartialPayment"
+                          type="checkbox"
+                          defaultValue
+                          className="mt-5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          onChange={formik.handleChange}
+                          checked={formik.values.isPartialPayment}
+                        />
+
+                        <label
+                          htmlFor="isPartialPayment"
+                          className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                        >
+                          Would You Like to Make a Partial Payment ?
+                        </label>
+                        {formik.touched.isPartialPayment &&
+                        formik.errors.isPartialPayment ? (
+                          <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                            <span className="font-medium">
+                              {formik.errors.isPartialPayment}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {formik.values.isArrear == false ? (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div className="">
+                        <label
+                          htmlFor="discount"
+                          className={`block mb-2 text-sm font-medium
+                                                ${
+                                                  formik.touched.discount &&
+                                                  formik.errors.discount
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
+                                                    `}
+                        >
+                          Discount
+                          <span className="text-red-700"> (₹)</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="discount"
+                          id="discount"
+                          className={`border text-sm rounded-lg block w-full p-2.5
+                                                ${
+                                                  formik.touched.discount &&
+                                                  formik.errors.discount
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
+                                                    `}
+                          value={formik.values.discount}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                        />
+                        {formik.touched.discount && formik.errors.discount ? (
+                          <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                            <span className="font-medium">
+                              {formik.errors.discount}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      {formik.values.isArrear == false &&
+                      formik.values.isPartialPayment ? (
+                        <>
+                          <div className="">
+                            <label
+                              htmlFor="releasedPayment"
+                              className={`block mb-2 text-sm font-medium
+                                                ${
+                                                  formik.touched
+                                                    .releasedPayment &&
+                                                  formik.errors.releasedPayment
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
+                                                    `}
+                            >
+                              Amount To Be Released
+                            </label>
+                            <input
+                              type="text"
+                              name="releasedPayment"
+                              id="releasedPayment"
+                              className={`border text-sm rounded-lg block w-full p-2.5
+                                                ${
+                                                  formik.touched
+                                                    .releasedPayment &&
+                                                  formik.errors.releasedPayment
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
+                                                    `}
+                              value={formik.values.releasedPayment}
+                              onChange={(e) => {
+                                formik.handleChange(e);
+                                calculatePendingAmt(e);
+                              }}
+                              onBlur={formik.handleBlur}
+                            />
+                            {formik.touched.releasedPayment &&
+                            formik.errors.releasedPayment ? (
+                              <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                                <span className="font-medium">
+                                  {formik.errors.releasedPayment}
+                                </span>
+                              </div>
+                            ) : null}
+                          </div>
+                        </>
+                      ) : null}
+                      {/* Partial Payment */}
+                    </div>
+                  ) : null}
                 </div>
               </div>
               <div className="space-y-4">
@@ -1048,7 +1224,7 @@ const PaymentForm = () => {
                       Arrear
                     </dt>
                     <dd className="text-base font-medium text-green-500">
-                      {arrear}
+                      {formik.values.arrear}
                     </dd>
                   </dl>
                   <dl className="flex items-center justify-between gap-4 py-3">
@@ -1072,9 +1248,20 @@ const PaymentForm = () => {
                       Total
                     </dt>
                     <dd className="text-base font-bold text-gray-900 dark:text-white">
-                      ₹{formik.values.membershipFee || 0}
+                      ₹{Number(formik.values.payableAmt).toFixed(2) || 0.0}
                     </dd>
                   </dl>
+
+                  {formik.values.isPartialPayment ? (
+                    <dl className="flex items-center justify-between gap-4 py-3">
+                      <dt className="text-base font-bold text-gray-900 dark:text-white">
+                        Pending Dues <span className="text-green-600"> </span>
+                      </dt>
+                      <dd className="text-base font-bold text-gray-900 dark:text-white">
+                        ₹{Number(formik.values.pendingAmt).toFixed(2) || 0.0}
+                      </dd>
+                    </dl>
+                  ) : null}
                 </div>
               </div>
               <div className="space-y-3">

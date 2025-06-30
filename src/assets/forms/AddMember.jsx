@@ -866,7 +866,7 @@ const AddMember = ({
                       htmlFor="isPartialPayment"
                       className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                     >
-                      Would You Like to Make a Partial Payment?
+                      Would You Like to Make a Partial Payment ?
                     </label>
                     {formik.touched.isPartialPayment &&
                     formik.errors.isPartialPayment ? (

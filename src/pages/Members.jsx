@@ -257,7 +257,6 @@ const Members = () => {
           <Link
             state={{
               memberId: row.id,
-              amount: 500,
               plans: plans,
             }}
             to="/member-payment"
