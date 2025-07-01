@@ -2,7 +2,7 @@ import { faCreditCard, faMoneyBill } from "@fortawesome/free-solid-svg-icons";
 import { faReceipt } from "@fortawesome/free-solid-svg-icons/faReceipt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Tooltip } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DataTable from "react-data-table-component";
 import Invoice from "../components/Invoice";
 import { API_BASE_URL, CURRENT_DATE } from "../config/utilities";
@@ -16,6 +16,7 @@ import DatePicker from "react-datepicker";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { format } from "date-fns";
+import jsPDF from "jspdf";
 
 const Transactions = () => {
   const [loader, setLoader] = useState(false);
@@ -29,6 +30,7 @@ const Transactions = () => {
   const [filterEndDate, setFilterEndDate] = useState();
   const [filterRecipient, setFilterRecipient] = useState();
   const [totalAmount, setTotalAmount] = useState();
+
   const formik = useFormik({
     initialValues: {
       paymentFrom: null,

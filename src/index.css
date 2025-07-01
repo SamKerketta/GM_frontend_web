@@ -34,3 +34,9 @@ body {
 .max-w-md-modal {
   max-width: 70rem;
 }
+
+@media print {
+  .no-print {
+    display: none;
+  }
+}

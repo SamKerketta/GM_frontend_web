@@ -199,7 +199,7 @@ const Members = () => {
       sortable: true,
     },
     {
-      name: "Due Months",
+      name: "Arrear",
       cell: (row, index) => (
         <>
           {row.months_due > 0 ? (
