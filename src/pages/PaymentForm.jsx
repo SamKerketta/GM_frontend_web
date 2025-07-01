@@ -128,7 +128,12 @@ const PaymentForm = () => {
       payload.amountPaid = values.releasedPayment;
       payload.monthFrom = values.monthFrom;
       payload.planId = values.planId;
+      payload.discount = values.discount;
     }
+
+    // console.log(payload);
+    // setLoader(false);
+    // return false;
 
     try {
       await axios

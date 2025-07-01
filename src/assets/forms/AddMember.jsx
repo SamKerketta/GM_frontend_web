@@ -86,6 +86,7 @@ const AddMember = ({
       paymentMethod: "CASH",
       isPartialPayment: false,
       releasedPayment: 0,
+      isAdmission: true,
     },
     validationSchema: Yup.object({
       name: Yup.string()
