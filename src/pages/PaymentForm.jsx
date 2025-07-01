@@ -129,26 +129,6 @@ const PaymentForm = () => {
       payload.monthFrom = values.monthFrom;
       payload.planId = values.planId;
     }
-    // const payload = {
-    //   memberId: memberDtl.id,
-    //   planId: values.planId,
-    //   amountPaid: values.membershipFee,
-    //   paymentFor: "plan",
-    //   paymentMethod: values.paymentMethod,
-    //   monthFrom: values.monthFrom,
-    //   // conditionals as per arrear
-    //   netAmt: values.netAmt,
-    //   discount: values.discount,
-    //   isPartialPayment: values.isPartialPayment,
-    //   releasedPayment: values.releasedPayment,
-    //   isArrear: values.isArrear,
-    //   arrear: values.arrear, // Fetch from field value
-    //   pendingAmt: values.pendingAmt,
-    // };
-
-    console.log(payload);
-    setLoader(false);
-    return false;
 
     try {
       await axios
@@ -210,7 +190,7 @@ const PaymentForm = () => {
 
   // Calculation of Payments
   const calculationPayments = async () => {
-    const formattedlaterDate = await getEndingDateByPlanId(
+    const formattedlaterDate = getEndingDateByPlanId(
       formik.values.monthFrom,
       formik.values.planId,
       formik.values.durationInMonths

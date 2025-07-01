@@ -161,8 +161,6 @@ const AddMember = ({
     if (payload.isPartialPayment) {
       payload.amountPaid = payload.releasedPayment;
     }
-    console.log(payload);
-    return;
     try {
       await axios
         .post(`${addMemberApi}`, payload, {
@@ -231,7 +229,6 @@ const AddMember = ({
     }
     const discountPerc =
       (formik.values.payableAmt / formik.values.netAmt) * 100;
-    console.log(discountPerc);
     // formik.setFieldValue("discount", discountPerc);
   }, [formik.values.payableAmt]);
 
