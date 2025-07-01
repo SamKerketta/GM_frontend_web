@@ -161,8 +161,8 @@ const AddMember = ({
     if (payload.isPartialPayment) {
       payload.amountPaid = payload.releasedPayment;
     }
-    // console.log(payload);
-    // return;
+    console.log(payload);
+    return;
     try {
       await axios
         .post(`${addMemberApi}`, payload, {

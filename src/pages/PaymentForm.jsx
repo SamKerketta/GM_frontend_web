@@ -146,9 +146,9 @@ const PaymentForm = () => {
     //   pendingAmt: values.pendingAmt,
     // };
 
-    // console.log(payload);
-    // setLoader(false);
-    // return false;
+    console.log(payload);
+    setLoader(false);
+    return false;
 
     try {
       await axios
