@@ -63,7 +63,7 @@ export async function downloadInvoicePdf(invoiceRef,receiptDtls) {
     const pageHeight = pdf.internal.pageSize.getHeight() - margin * 2;
 
     const canvas = await html2canvas(invoiceRef.current, {
-      scale: 2,
+      scale: 1,
       useCORS: true,
       backgroundColor: "#fff", // white background
     });
