@@ -158,6 +158,9 @@ const AddMember = ({
 
   // Submit Members api call
   const submitMember = async (payload, resetForm) => {
+    if (payload.isPartialPayment) {
+      payload.amountPaid = payload.releasedPayment;
+    }
     // console.log(payload);
     // return;
     try {

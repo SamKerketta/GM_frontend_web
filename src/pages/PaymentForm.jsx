@@ -49,15 +49,47 @@ const PaymentForm = () => {
       isPartialPayment: false,
       releasedPayment: 0,
       isArrear: false,
-      arrear: 0,
+      arrear: 60, // Fetch from field value
       pendingAmt: 0,
     },
     validationSchema: Yup.object({
       planId: Yup.number()
         .typeError("Plan is Invalid") // handles string inputs like "abc"
         .integer("Plan ID must be an integer")
-        .required("Please Enter This Field"),
-      monthFrom: Yup.date().required("Please Enter This Field"),
+        .when("isArrear", {
+          is: false,
+          then: (schema) => schema.required("Please Enter This Field"),
+          otherwise: (schema) => schema.nullable(true),
+        }),
+      monthFrom: Yup.date().when("isArrear", {
+        is: false,
+        then: (schema) => schema.required("Please Enter This Field"),
+        otherwise: (schema) => schema.nullable(true),
+      }),
+      discount: Yup.number().test(
+        "is-less-than-netAmt",
+        "Discount must be less than Net Amount",
+        function (value) {
+          const { netAmt, isArrear } = this.parent;
+          // Skip the test if isArrear is true
+          if (isArrear === true) {
+            return true;
+          }
+          return value == null || Number(value) < Number(netAmt);
+        }
+      ),
+      releasedPayment: Yup.number().test(
+        "is-less-than-payableAmt",
+        "Released must be less than Payable Amount",
+        function (value) {
+          const { payableAmt, isArrear } = this.parent;
+          // Skip the test if isArrear is true
+          if (isArrear === true) {
+            return true;
+          }
+          return value == null || Number(value) < Number(payableAmt);
+        }
+      ),
     }),
     onSubmit: (values, { resetForm }) => {
       submitPayment(values, resetForm);
@@ -70,12 +102,53 @@ const PaymentForm = () => {
     const token = localStorage.getItem("authToken");
     const payload = {
       memberId: memberDtl.id,
-      planId: values.planId,
-      amountPaid: values.membershipFee,
       paymentFor: "plan",
       paymentMethod: values.paymentMethod,
-      monthFrom: values.monthFrom,
+      isArrear: false,
     };
+
+    // Only Arrear Payment
+    if (values.isArrear) {
+      payload.isArrear = true;
+      payload.paymentFor = "arrear";
+    }
+
+    // Normal Payment
+    if (values.isPartialPayment == false && values.isArrear == false) {
+      payload.isPartialPayment = values.isPartialPayment;
+      payload.amountPaid = values.payableAmt;
+      payload.discount = values.discount;
+      payload.monthFrom = values.monthFrom;
+      payload.planId = values.planId;
+    }
+
+    // Partial Payment
+    if (values.isPartialPayment && values.isArrear == false) {
+      payload.isPartialPayment = values.isPartialPayment;
+      payload.amountPaid = values.releasedPayment;
+      payload.monthFrom = values.monthFrom;
+      payload.planId = values.planId;
+    }
+    // const payload = {
+    //   memberId: memberDtl.id,
+    //   planId: values.planId,
+    //   amountPaid: values.membershipFee,
+    //   paymentFor: "plan",
+    //   paymentMethod: values.paymentMethod,
+    //   monthFrom: values.monthFrom,
+    //   // conditionals as per arrear
+    //   netAmt: values.netAmt,
+    //   discount: values.discount,
+    //   isPartialPayment: values.isPartialPayment,
+    //   releasedPayment: values.releasedPayment,
+    //   isArrear: values.isArrear,
+    //   arrear: values.arrear, // Fetch from field value
+    //   pendingAmt: values.pendingAmt,
+    // };
+
+    // console.log(payload);
+    // setLoader(false);
+    // return false;
 
     try {
       await axios
@@ -129,7 +202,8 @@ const PaymentForm = () => {
       formik.setFieldValue("discount", 0);
       formik.setFieldValue("releasedPayment", 0);
       formik.setFieldValue("pendingAmt", 0);
-      formik.setFieldValue("payableAmt", 0);
+      formik.setFieldValue("payableAmt", formik.values.arrear);
+      formik.setFieldValue("membershipFee", 0);
       formik.setFieldValue("planId", null);
     }
   }, [formik.values.isArrear]);
@@ -977,30 +1051,32 @@ const PaymentForm = () => {
                   ) : null}
 
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="col-span-1 mt-5">
-                      <input
-                        id="isArrear"
-                        type="checkbox"
-                        defaultValue
-                        className="mt-5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                        onChange={formik.handleChange}
-                        checked={formik.values.isArrear}
-                      />
+                    {formik.values.arrear > 0 ? (
+                      <div className="col-span-1 mt-5">
+                        <input
+                          id="isArrear"
+                          type="checkbox"
+                          defaultValue
+                          className="mt-5 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          onChange={formik.handleChange}
+                          checked={formik.values.isArrear}
+                        />
 
-                      <label
-                        htmlFor="isArrear"
-                        className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                      >
-                        Pay Only <span className="text-red-500">Arrear</span>
-                      </label>
-                      {formik.touched.isArrear && formik.errors.isArrear ? (
-                        <div className="mt-2 text-sm text-red-600 dark:text-red-500">
-                          <span className="font-medium">
-                            {formik.errors.isArrear}
-                          </span>
-                        </div>
-                      ) : null}
-                    </div>
+                        <label
+                          htmlFor="isArrear"
+                          className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                        >
+                          Pay Only <span className="text-red-500">Arrear</span>
+                        </label>
+                        {formik.touched.isArrear && formik.errors.isArrear ? (
+                          <div className="mt-2 text-sm text-red-600 dark:text-red-500">
+                            <span className="font-medium">
+                              {formik.errors.isArrear}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
 
                     {formik.values.isArrear == false ? (
                       <div className="col-span-2 mt-5">
