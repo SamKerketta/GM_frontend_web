@@ -68,7 +68,7 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
         onClose={() => setOpenModal(false)}
       >
         <ModalBody>
-          <div ref={invoiceRef} style={{ padding: 20 }}>
+          <div ref={invoiceRef}>
             {/* Modal */}
             <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center rounded-t-xl dark:bg-neutral-950">
               {/* Close Button */}
@@ -208,24 +208,48 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
                       <span>{receiptDtls?.phone}</span>
                     </div>
                   </li>
+
+                  {receiptDtls?.payment_for != "arrear" ? (
+                    <>
+                      <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
+                        <div className="flex items-center justify-between w-full">
+                          <span>Plan Acquired</span>
+                          <span>
+                            {receiptDtls?.plan_name} ({receiptDtls?.duration})
+                          </span>
+                        </div>
+                      </li>
+                      <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
+                        <div className="flex items-center justify-between w-full">
+                          <span>Valid From</span>
+                          <span> {dmyToLongForm(receiptDtls?.month_from)}</span>
+                        </div>
+                      </li>
+                      <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
+                        <div className="flex items-center justify-between w-full">
+                          <span>Valid To</span>
+                          <span>{dmyToLongForm(receiptDtls?.month_till)}</span>
+                        </div>
+                      </li>
+                    </>
+                  ) : null}
+
                   <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                     <div className="flex items-center justify-between w-full">
-                      <span>Plan Acquired</span>
-                      <span>
-                        {receiptDtls?.plan_name} ({receiptDtls?.duration})
-                      </span>
+                      <span>Net Amount</span>
+                      <span>{receiptDtls?.net_amount}</span>
                     </div>
                   </li>
                   <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                     <div className="flex items-center justify-between w-full">
-                      <span>Valid From</span>
-                      <span> {dmyToLongForm(receiptDtls?.month_from)}</span>
+                      <span>Arrear Amount</span>
+                      <span>{receiptDtls?.arrear_amount}</span>
                     </div>
                   </li>
                   <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:border-neutral-700 dark:text-neutral-200">
                     <div className="flex items-center justify-between w-full">
-                      <span>Valid To</span>
-                      <span>{dmyToLongForm(receiptDtls?.month_till)}</span>
+                      <span>Discount</span>
+                      <span>{receiptDtls?.discount_amount}</span>
                     </div>
                   </li>
                   <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200">
@@ -234,6 +258,15 @@ const Invoice = ({ openModal, setOpenModal, tranId }) => {
                       <span>
                         {CURRENCY}
                         {receiptDtls?.amount_paid}
+                      </span>
+                    </div>
+                  </li>
+                  <li className="inline-flex items-center gap-x-2 py-3 px-4 text-sm font-semibold bg-gray-50 border border-gray-200 text-gray-800 -mt-px first:rounded-t-lg first:mt-0 last:rounded-b-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200">
+                    <div className="flex items-center justify-between w-full">
+                      <span>Due Balance</span>
+                      <span>
+                        {CURRENCY}
+                        {receiptDtls?.due_balance ?? 0}
                       </span>
                     </div>
                   </li>
