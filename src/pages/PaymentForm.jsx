@@ -49,7 +49,7 @@ const PaymentForm = () => {
       isPartialPayment: false,
       releasedPayment: 0,
       isArrear: false,
-      arrear: 60, // Fetch from field value
+      arrear: Number(memberDtl.due_balance ?? 0), // Fetch from field value
       pendingAmt: 0,
     },
     validationSchema: Yup.object({
@@ -111,6 +111,7 @@ const PaymentForm = () => {
     if (values.isArrear) {
       payload.isArrear = true;
       payload.paymentFor = "arrear";
+      payload.amountPaid = values.arrear;
     }
 
     // Normal Payment
@@ -131,10 +132,6 @@ const PaymentForm = () => {
       payload.discount = values.discount;
     }
 
-    // console.log(payload);
-    // setLoader(false);
-    // return false;
-
     try {
       await axios
         .post(apiUrl, payload, {
@@ -150,7 +147,7 @@ const PaymentForm = () => {
               navigate("/payment-success", {
                 state: {
                   invoiceNo: response.data.data,
-                  amount: formik.values.membershipFee,
+                  amount: payload.amountPaid,
                   paymentMethod: formik.values.paymentMethod,
                   recipient: formik.values.name,
                 },
