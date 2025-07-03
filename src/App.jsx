@@ -16,8 +16,12 @@ import Transactions from "./pages/Transactions";
 import AddMember from "./assets/forms/AddMember";
 import Profile from "./pages/Profile";
 import Plans from "./pages/Plans";
+import Invoice from "./components/Invoice";
+import InvoiceRouteWrapper from "./components/InvoiceRouteWrapper";
 
 function App() {
+  const [openInvoice, setOpenInvoice] = useState(true);
+
   return (
     <>
       <Router>
@@ -39,6 +43,15 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/plans" element={<Plans />} />
           </Route>
+          <Route
+            path="/invoice/:tranId"
+            element={
+              <InvoiceRouteWrapper
+                openModal={openInvoice}
+                setOpenModal={setOpenInvoice}
+              />
+            }
+          />
         </Routes>
       </Router>
       <ToastContainer />
