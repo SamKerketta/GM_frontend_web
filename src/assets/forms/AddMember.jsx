@@ -24,7 +24,11 @@ import axios from "axios";
 import SuccessToast from "../../components/SuccessToast";
 import { getEndingDateByPlanId, handleValidation } from "../../Services/Utils";
 import { useNavigate } from "react-router-dom";
-import { faCamera, faUsers, faVideoSlash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCamera,
+  faUsers,
+  faVideoSlash,
+} from "@fortawesome/free-solid-svg-icons";
 
 /**
  * Things to do
@@ -36,15 +40,14 @@ const AddMember = ({
   setOpenMemberModal,
   setreloadMembers,
 }) => {
-  const placeHolderImage = "https://whitedotpublishers.com/wp-content/uploads/2022/05/male-placeholder-image.jpeg";
+  const placeHolderImage =
+    "https://whitedotpublishers.com/wp-content/uploads/2022/05/male-placeholder-image.jpeg";
   const addMemberApi = `${API_BASE_URL}/crud/member/add-member`;
   const currentDate = CURRENT_DATE;
   const [plans, setPlans] = useState([]);
   const planListApi = `${API_BASE_URL}/crud/plans/list`;
   const navigate = useNavigate();
-  const [previewProfile, setPreviewProfile] = useState(
-    placeHolderImage
-  );
+  const [previewProfile, setPreviewProfile] = useState(placeHolderImage);
 
   const firstRender = useRef(true);
 
@@ -84,18 +87,15 @@ const AddMember = ({
     },
     validationSchema: Yup.object({
       name: Yup.string()
-        .max(25, "Must be 25 characters or less")
+        .max(50, "Must be 50 characters or less")
         .required("Please Enter This Field"),
       email: Yup.string()
         .email("Invalid Email Address")
-        .max(25, "Must be 25 characters or less")
-        .required("Please Enter This Field"),
+        .max(50, "Must be 50 characters or less"),
       phone: Yup.string()
         .matches(/^[0-9]{10}$/, "Phone number must be Valid Number")
         .required("Please Enter This Field"),
-      dob: Yup.date()
-        .max(new Date(), "Date Range can not be in future")
-        .required("Please Enter Date Of Birth"),
+      dob: Yup.date().max(new Date(), "Date Range can not be in future"),
       gender: Yup.string()
         .oneOf(["male", "female"], 'Gender must be either "Male" or "Female"')
         .required("Please Enter This Field"),
@@ -184,14 +184,14 @@ const AddMember = ({
       setCapturedImage(URL.createObjectURL(file));
       setPreviewProfile(URL.createObjectURL(file));
       setFileBlob(file);
-      formik.setFieldValue("photo", file)
+      formik.setFieldValue("photo", file);
       setTimeout(() => {
         console.log("After setFieldValue:", formik.values.photo);
       }, 100); // wait a tick
     }, "image/jpeg");
 
     stopCamera();
-    console.log(formik.values)
+    console.log(formik.values);
   };
 
   const stopCamera = () => {
@@ -204,7 +204,7 @@ const AddMember = ({
 
   const removeImage = () => {
     setCapturedImage(null);
-    setPreviewProfile(placeHolderImage)
+    setPreviewProfile(placeHolderImage);
     setFileBlob(null);
   };
 
@@ -348,11 +348,12 @@ const AddMember = ({
                 <label
                   htmlFor="name"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.name &&
-                      formik.errors.name
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.name &&
+                                                  formik.errors.name
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Name
@@ -362,11 +363,12 @@ const AddMember = ({
                   name="name"
                   id="name"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.name &&
-                      formik.errors.name
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.name &&
+                                                  formik.errors.name
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   placeholder="Member's Name"
                   onChange={formik.handleChange}
@@ -383,11 +385,12 @@ const AddMember = ({
                 <label
                   htmlFor="email"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.email &&
-                      formik.errors.email
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.email &&
+                                                  formik.errors.email
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Email
@@ -398,11 +401,12 @@ const AddMember = ({
                   id="email"
                   placeholder="example@gmail.com"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.email &&
-                      formik.errors.email
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.email &&
+                                                  formik.errors.email
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   onChange={formik.handleChange}
                   value={formik.values.email}
@@ -417,11 +421,12 @@ const AddMember = ({
                 <label
                   htmlFor="phone"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.phone &&
-                      formik.errors.phone
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.phone &&
+                                                  formik.errors.phone
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Mobile
@@ -432,11 +437,12 @@ const AddMember = ({
                   id="phone"
                   placeholder="0123456789"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.phone &&
-                      formik.errors.phone
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.phone &&
+                                                  formik.errors.phone
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -453,11 +459,12 @@ const AddMember = ({
                 <label
                   htmlFor="dob"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.dob &&
-                      formik.errors.dob
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.dob &&
+                                                  formik.errors.dob
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Date of Birth
@@ -467,11 +474,12 @@ const AddMember = ({
                   name="dob"
                   id="dob"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.dob &&
-                      formik.errors.dob
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.dob &&
+                                                  formik.errors.dob
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -488,11 +496,12 @@ const AddMember = ({
                 <label
                   htmlFor="gender"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.gender &&
-                      formik.errors.gender
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.gender &&
+                                                  formik.errors.gender
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Gender
@@ -501,11 +510,12 @@ const AddMember = ({
                   name="gender"
                   id="gender"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.gender &&
-                      formik.errors.gender
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.gender &&
+                                                  formik.errors.gender
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   onChange={formik.handleChange}
                   value={formik.values.gender}
@@ -525,11 +535,12 @@ const AddMember = ({
                 <label
                   htmlFor="planId"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.planId &&
-                      formik.errors.planId
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.planId &&
+                                                  formik.errors.planId
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Select Plan
@@ -538,11 +549,12 @@ const AddMember = ({
                   name="planId"
                   id="planId"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.planId &&
-                      formik.errors.planId
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.planId &&
+                                                  formik.errors.planId
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   // onChange={formik.handleChange}
                   onChange={(e) => {
@@ -586,11 +598,12 @@ const AddMember = ({
                 <label
                   htmlFor="shiftId"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.shiftId &&
-                      formik.errors.shiftId
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.shiftId &&
+                                                  formik.errors.shiftId
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Select Shift
@@ -599,11 +612,12 @@ const AddMember = ({
                   name="shiftId"
                   id="shiftId"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.shiftId &&
-                      formik.errors.shiftId
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.shiftId &&
+                                                  formik.errors.shiftId
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   onChange={formik.handleChange}
                   value={formik.values.shiftId}
@@ -625,11 +639,12 @@ const AddMember = ({
                 <label
                   htmlFor="address"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.address &&
-                      formik.errors.address
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.address &&
+                                                  formik.errors.address
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Address
@@ -638,11 +653,12 @@ const AddMember = ({
                   name="address"
                   id="address"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.address &&
-                      formik.errors.address
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched.address &&
+                                                  formik.errors.address
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -660,10 +676,11 @@ const AddMember = ({
                   <label
                     htmlFor="photo"
                     className={`flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500
-                     ${formik.touched.address && formik.errors.address
-                        ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                        : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                      }
+                     ${
+                       formik.touched.address && formik.errors.address
+                         ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                         : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                     }
                     `}
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -732,7 +749,11 @@ const AddMember = ({
               {streaming && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center">
                   <div className="relative bg-white rounded-lg p-4 shadow-lg">
-                    <video ref={videoRef} autoPlay className="w-[90vw] max-w-[600px] h-auto rounded" />
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      className="w-[90vw] max-w-[600px] h-auto rounded"
+                    />
 
                     <div className="flex justify-center mt-4 gap-4">
                       <button
@@ -767,12 +788,13 @@ const AddMember = ({
                 <label
                   htmlFor="membershipStart"
                   className={`block mb-2 text-sm font-medium
-                                                ${formik.touched
-                      .membershipStart &&
-                      formik.errors.membershipStart
-                      ? "text-red-900"
-                      : "text-gray-900 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched
+                                                    .membershipStart &&
+                                                  formik.errors.membershipStart
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                 >
                   Membership Starting Date
@@ -782,18 +804,19 @@ const AddMember = ({
                   name="membershipStart"
                   id="membershipStart"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched
-                      .membershipStart &&
-                      formik.errors.membershipStart
-                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    }
+                                                ${
+                                                  formik.touched
+                                                    .membershipStart &&
+                                                  formik.errors.membershipStart
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                   onChange={formik.handleChange}
                   value={formik.values.membershipStart}
                 />
                 {formik.touched.membershipStart &&
-                  formik.errors.membershipStart ? (
+                formik.errors.membershipStart ? (
                   <div className="mt-2 text-sm text-red-600 dark:text-red-500">
                     <span className="font-medium">
                       {formik.errors.membershipStart}
@@ -900,11 +923,12 @@ const AddMember = ({
                     <label
                       htmlFor="discount"
                       className={`block mb-2 text-sm font-medium
-                                                ${formik.touched.discount &&
-                          formik.errors.discount
-                          ? "text-red-900"
-                          : "text-gray-900 dark:text-white"
-                        }
+                                                ${
+                                                  formik.touched.discount &&
+                                                  formik.errors.discount
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                     >
                       Discount
@@ -915,11 +939,12 @@ const AddMember = ({
                       name="discount"
                       id="discount"
                       className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched.discount &&
-                          formik.errors.discount
-                          ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                          : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                        }
+                                                ${
+                                                  formik.touched.discount &&
+                                                  formik.errors.discount
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                       value={formik.values.discount}
                       onChange={(e) => {
@@ -972,7 +997,7 @@ const AddMember = ({
                       Would You Like to Make a Partial Payment ?
                     </label>
                     {formik.touched.isPartialPayment &&
-                      formik.errors.isPartialPayment ? (
+                    formik.errors.isPartialPayment ? (
                       <div className="mt-2 text-sm text-red-600 dark:text-red-500">
                         <span className="font-medium">
                           {formik.errors.isPartialPayment}
@@ -987,12 +1012,13 @@ const AddMember = ({
                         <label
                           htmlFor="releasedPayment"
                           className={`block mb-2 text-sm font-medium
-                                                ${formik.touched
-                              .releasedPayment &&
-                              formik.errors.releasedPayment
-                              ? "text-red-900"
-                              : "text-gray-900 dark:text-white"
-                            }
+                                                ${
+                                                  formik.touched
+                                                    .releasedPayment &&
+                                                  formik.errors.releasedPayment
+                                                    ? "text-red-900"
+                                                    : "text-gray-900 dark:text-white"
+                                                }
                                                     `}
                         >
                           Amount To Be Released
@@ -1002,12 +1028,13 @@ const AddMember = ({
                           name="releasedPayment"
                           id="releasedPayment"
                           className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${formik.touched
-                              .releasedPayment &&
-                              formik.errors.releasedPayment
-                              ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                              : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            }
+                                                ${
+                                                  formik.touched
+                                                    .releasedPayment &&
+                                                  formik.errors.releasedPayment
+                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                                                }
                                                     `}
                           value={formik.values.releasedPayment}
                           readOnly={!isPartialPayment}
@@ -1018,7 +1045,7 @@ const AddMember = ({
                           onBlur={formik.handleBlur}
                         />
                         {formik.touched.releasedPayment &&
-                          formik.errors.releasedPayment ? (
+                        formik.errors.releasedPayment ? (
                           <div className="mt-2 text-sm text-red-600 dark:text-red-500">
                             <span className="font-medium">
                               {formik.errors.releasedPayment}

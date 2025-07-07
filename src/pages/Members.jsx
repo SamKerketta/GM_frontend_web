@@ -2,8 +2,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import { Button } from "flowbite-react";
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-import { faCreditCard, faUser } from "@fortawesome/free-solid-svg-icons";
-import { API_BASE_URL } from "../config/utilities";
+import {
+  faCreditCard,
+  faTrash,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
+import { API_BASE_URL, AUTH_TOKEN } from "../config/utilities";
 import axios from "axios";
 import ErrorToast from "../components/ErrorToast";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
@@ -15,8 +19,9 @@ import { faCircleCheck } from "@fortawesome/free-solid-svg-icons/faCircleCheck";
 import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons/faMoneyCheckDollar";
 import WidgetLoader from "../components/WidgetLoader";
 import { Modal } from "flowbite-react";
-import { isNullOrEmpty } from "../Services/Utils";
+import { handleValidation, isNullOrEmpty } from "../Services/Utils";
 import { Dropdown, DropdownDivider, DropdownItem } from "flowbite-react";
+import { width } from "@fortawesome/free-solid-svg-icons/faUser";
 
 // Members api
 const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
@@ -42,6 +47,9 @@ const Members = () => {
   const [searchMember, setSearchMember] = useState();
   const [searchMemberStatus, setSearchMemberStatus] = useState(false);
   const [searchDueStatus, setSearchDueStatus] = useState();
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteItems, setDeleteItems] = useState({ id: null, planName: "" });
+  const aDeletePlan = API_BASE_URL + "/crud/member/delete-member";
 
   useEffect(() => {
     axios.post(`${planListApi}`).then((response) => {
@@ -144,11 +152,50 @@ const Members = () => {
     setProfilePic(true);
   };
 
+  const submitDeletion = async () => {
+    setLoader(true);
+    try {
+      const response = await axios.post(
+        aDeletePlan,
+        {
+          id: deleteItems.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+          },
+        }
+      );
+      if (response.status == 200) {
+        if (response.data.status) {
+          SuccessToast.show(response.data.message);
+          fetchMembers();
+          setDeleteModal(false);
+        } else {
+          throw response.data.message;
+        }
+      }
+      if (response.status != 200) {
+        throw "Something Went Wrong";
+      }
+    } catch (error) {
+      if (error.isAxiosError) {
+        handleValidation(error.response.data.errors);
+      } else {
+        ErrorToast.show(error);
+      }
+    } finally {
+      setLoader(false);
+    }
+    console.log("Item Deleted");
+  };
+
   const columns = [
     {
       name: "#",
       selector: (row, index) => index + 1,
       sortable: true,
+      width: "5%",
     },
     {
       name: "Member's Name",
@@ -160,26 +207,31 @@ const Members = () => {
         </>
       ),
       sortable: true,
+      width: "15%",
     },
     {
       name: "Member's Contact",
       selector: (row) => row.phone,
       sortable: true,
+      width: "10%",
     },
     {
       name: "Gender",
       selector: (row) => row.gender,
       sortable: true,
+      width: "10%",
     },
     {
       name: "Shift",
       selector: (row) => row.shift_name,
       sortable: true,
+      width: "10%",
     },
     {
       name: "Date Of Joining",
       selector: (row) => row.membership_start,
       sortable: true,
+      width: "10%",
     },
     {
       name: "Dues Status",
@@ -197,6 +249,7 @@ const Members = () => {
         </>
       ),
       sortable: true,
+      width: "10%",
     },
     {
       name: "Arrear",
@@ -214,11 +267,13 @@ const Members = () => {
         </>
       ),
       sortable: true,
+      width: "10%",
     },
     {
       name: "Due Date",
       selector: (row) => row.membership_end,
       sortable: true,
+      width: "10%",
     },
     {
       name: "Action",
@@ -265,8 +320,23 @@ const Members = () => {
           >
             <FontAwesomeIcon icon={faMoneyCheckDollar} size="2x" />
           </Link>
+
+          {/* Delete Button */}
+
+          <Button
+            type="button"
+            className="px-2 py-2 text-xs font-medium text-white bg-red-600 rounded-full hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800 inline-flex items-center"
+            onClick={() => {
+              setDeleteModal(true);
+              const selected = { id: row.id, planName: row.plan_name };
+              setDeleteItems(selected);
+            }}
+          >
+            <FontAwesomeIcon icon={faTrash} size="2x" />
+          </Button>
         </div>
       ),
+      width: "10%",
     },
   ];
 
@@ -407,6 +477,37 @@ const Members = () => {
             Close
           </Button>
         </ModalFooter>
+      </Modal>
+
+      {/* Delete Modal */}
+      <Modal
+        show={deleteModal}
+        size="md"
+        onClose={() => setDeleteModal(false)}
+        popup
+      >
+        <ModalHeader />
+        <ModalBody>
+          <div className="text-center">
+            <FontAwesomeIcon icon={faTrash} className="text-red-600 text-2xl" />
+            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete Plan <b>{deleteItems.planName}</b>{" "}
+              ?
+            </h3>
+            <div className="flex justify-center gap-4">
+              <Button color="red" onClick={() => submitDeletion()}>
+                Yes, I'm sure
+              </Button>
+              <Button
+                color="alternative"
+                disabled={loader}
+                onClick={() => setDeleteModal(false)}
+              >
+                No, cancel
+              </Button>
+            </div>
+          </div>
+        </ModalBody>
       </Modal>
     </>
   );
