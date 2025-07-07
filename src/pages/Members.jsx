@@ -152,6 +152,8 @@ const Members = () => {
     setProfilePic(true);
   };
 
+  // Delete the Member
+
   const submitDeletion = async () => {
     setLoader(true);
     try {
