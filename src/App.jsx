@@ -18,6 +18,7 @@ import Profile from "./pages/Profile";
 import Plans from "./pages/Plans";
 import Invoice from "./components/Invoice";
 import InvoiceRouteWrapper from "./components/InvoiceRouteWrapper";
+import EditMember from "./assets/forms/EditMember";
 
 function App() {
   const [openInvoice, setOpenInvoice] = useState(true);
@@ -37,6 +38,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/members" element={<Members />} />
             <Route path="/add-member" element={<AddMember />} />
+            <Route path="/edit-member" element={<EditMember />} />
             <Route path="/member-payment" element={<PaymentForm />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/transactions" element={<Transactions />} />

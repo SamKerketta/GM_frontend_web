@@ -138,3 +138,73 @@ export async function printInvoice(invoiceRef){
       printWindow.close();
     }, 500);
 }
+
+// Capture Image function
+ export const captureImage = (videoRef,canvasRef,setCapturedImage,setPreviewProfile,setFileBlob,setStreaming) => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    const context = canvas.getContext("2d");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob((blob) => {
+      const file = new File([blob], "captured.jpg", { type: "image/jpeg" });
+      setCapturedImage(URL.createObjectURL(file));
+      setPreviewProfile(URL.createObjectURL(file));
+      setFileBlob(file);
+      formik.setFieldValue("photo", file);
+      setTimeout(() => {
+        console.log("After setFieldValue:", formik.values.photo);
+      }, 100); // wait a tick
+    }, "image/jpeg");
+
+    stopCamera(videoRef,setStreaming);
+    console.log(formik.values);
+  };
+
+
+  // Stop Camera
+   export const stopCamera = (videoRef,setStreaming) => {
+    const stream = videoRef.current.srcObject;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+    setStreaming(false);
+  };
+
+  // Start Streaming
+  export const startStreaming = (streaming,videoRef,navigator,setStreaming) =>{
+      if (streaming && videoRef.current) {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          console.error("Camera API not supported or insecure origin.");
+          alert("Camera is not supported or needs HTTPS connection.");
+          setStreaming(false);
+          return;
+        }
+
+        navigator.mediaDevices
+          .getUserMedia({ video: { facingMode: "user" }, audio: false })
+          .then((stream) => {
+            videoRef.current.srcObject = stream;
+          })
+          .catch((err) => {
+            console.error("Camera error:", err);
+            setStreaming(false);
+          });
+    }
+  }
+
+  // handle file change
+  export const handleFileChange = (e,setPreviewProfile,formik) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setPreviewProfile(imageUrl);
+      formik.setFieldValue("photo", e.currentTarget.files[0]);
+    }
+  };
+

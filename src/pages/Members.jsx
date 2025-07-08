@@ -3,7 +3,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import {
+  faBell,
+  faCheck,
   faCreditCard,
+  faPenToSquare,
   faTrash,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
@@ -12,8 +15,14 @@ import axios from "axios";
 import ErrorToast from "../components/ErrorToast";
 import { faUsers } from "@fortawesome/free-solid-svg-icons/faUsers";
 import AddMember from "../assets/forms/AddMember";
-import { Button, ModalBody, ModalFooter, ModalHeader } from "flowbite-react";
-import { Link } from "react-router-dom";
+import {
+  Button,
+  ButtonGroup,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from "flowbite-react";
+import { Link, useNavigate } from "react-router-dom";
 import SuccessToast from "../components/SuccessToast";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons/faCircleCheck";
 import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons/faMoneyCheckDollar";
@@ -50,6 +59,7 @@ const Members = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteItems, setDeleteItems] = useState({ id: null, planName: "" });
   const aDeletePlan = API_BASE_URL + "/crud/member/delete-member";
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.post(`${planListApi}`).then((response) => {
@@ -192,6 +202,25 @@ const Members = () => {
     console.log("Item Deleted");
   };
 
+  // Navigation to payment page
+  const navigateToPaymentPage = (memberId) => {
+    navigate("/member-payment", {
+      state: {
+        memberId: memberId,
+        plans: plans,
+      },
+    });
+  };
+
+  // Navigation to Edit Member Page
+  const navigateToEditMember = (memberDtls) => {
+    navigate("/edit-member", {
+      state: {
+        memberDtls: memberDtls,
+      },
+    });
+  };
+
   const columns = [
     {
       name: "#",
@@ -221,7 +250,7 @@ const Members = () => {
       name: "Gender",
       selector: (row) => row.gender,
       sortable: true,
-      width: "10%",
+      width: "7%",
     },
     {
       name: "Shift",
@@ -269,7 +298,7 @@ const Members = () => {
         </>
       ),
       sortable: true,
-      width: "10%",
+      width: "8%",
     },
     {
       name: "Due Date",
@@ -282,63 +311,67 @@ const Members = () => {
       button: true,
       cell: (row) => (
         <div className="flex gap-1 m-2">
-          {/* Info Button */}
-          <Button
-            type="button"
-            className="px-3 py-2 text-xs font-medium text-white bg-blue-700 rounded-full hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 inline-flex items-center"
-            disabled={notifiedId === row.id}
-            onClick={() => sendWhatsappMsg(row.id)}
-          >
-            {notifiedId === row.id ? (
-              <FontAwesomeIcon icon={faCircleCheck} size="2x" />
-            ) : (
-              <svg
-                class="w-6 h-6 text-white dark:text-white"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 20 21"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10 3.464V1.1m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175C17 15.4 17 16 16.462 16H3.538C3 16 3 15.4 3 14.807c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 10 3.464ZM1.866 8.832a8.458 8.458 0 0 1 2.252-5.714m14.016 5.714a8.458 8.458 0 0 0-2.252-5.714M6.54 16a3.48 3.48 0 0 0 6.92 0H6.54Z"
-                ></path>
-              </svg>
-            )}
-          </Button>
+          <ButtonGroup>
+            <Button
+              color="alternative"
+              disabled={notifiedId === row.id}
+              onClick={() => {
+                sendWhatsappMsg(row.id);
+              }}
+            >
+              {notifiedId === row.id ? (
+                <FontAwesomeIcon
+                  icon={faCheck}
+                  size="sm"
+                  className="text-green-500"
+                />
+              ) : (
+                <FontAwesomeIcon
+                  icon={faBell}
+                  size="md"
+                  className="text-blue-500"
+                />
+              )}
+            </Button>
 
-          {/* Danger Button */}
-          <Link
-            state={{
-              memberId: row.id,
-              plans: plans,
-            }}
-            to="/member-payment"
-            type="button"
-            className="px-2 py-2 text-xs font-medium text-white bg-red-600 rounded-full hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800 inline-flex items-center"
-          >
-            <FontAwesomeIcon icon={faMoneyCheckDollar} size="2x" />
-          </Link>
-
-          {/* Delete Button */}
-
-          <Button
-            type="button"
-            className="px-2 py-2 text-xs font-medium text-white bg-red-600 rounded-full hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800 inline-flex items-center"
-            onClick={() => {
-              setDeleteModal(true);
-              const selected = { id: row.id, planName: row.plan_name };
-              setDeleteItems(selected);
-            }}
-          >
-            <FontAwesomeIcon icon={faTrash} size="2x" />
-          </Button>
+            <Button
+              color="alternative"
+              onClick={() => navigateToPaymentPage(row.id)}
+              className="p-4 text-green-500 hover:text-green-400"
+            >
+              <FontAwesomeIcon size="md" icon={faMoneyCheckDollar} />
+            </Button>
+            <Button
+              color="alternative"
+              className="p-4"
+              onClick={() => navigateToEditMember(row)}
+            >
+              <FontAwesomeIcon
+                size="md"
+                icon={faPenToSquare}
+                className="text-blue-500"
+              />
+            </Button>
+            <Button
+              color="alternative"
+              className="p-4"
+              onClick={() => {
+                setDeleteModal(true);
+                const selected = { id: row.id, memberName: row.name };
+                setDeleteItems(selected);
+              }}
+            >
+              <FontAwesomeIcon
+                size="md"
+                icon={faTrash}
+                className="text-red-500"
+              />
+            </Button>
+          </ButtonGroup>
         </div>
       ),
-      width: "10%",
+      width: "15%",
+      allowOverflow: true,
     },
   ];
 
@@ -493,8 +526,8 @@ const Members = () => {
           <div className="text-center">
             <FontAwesomeIcon icon={faTrash} className="text-red-600 text-2xl" />
             <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Are you sure you want to delete Plan <b>{deleteItems.planName}</b>{" "}
-              ?
+              Are you sure you want to delete Member{" "}
+              <b>{deleteItems.memberName}</b> ?
             </h3>
             <div className="flex justify-center gap-4">
               <Button color="red" onClick={() => submitDeletion()}>

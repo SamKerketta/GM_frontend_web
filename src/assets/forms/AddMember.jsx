@@ -157,6 +157,13 @@ const AddMember = ({
 
   useEffect(() => {
     if (streaming && videoRef.current) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error("Camera API not supported or insecure origin.");
+        alert("Camera is not supported or needs HTTPS connection.");
+        setStreaming(false);
+        return;
+      }
+
       navigator.mediaDevices
         .getUserMedia({ video: { facingMode: "user" }, audio: false })
         .then((stream) => {

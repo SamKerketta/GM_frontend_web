@@ -37,7 +37,6 @@ const Navbar = () => {
   };
 
   const userInfo = JSON.parse(localStorage.getItem("userDetails"));
-  console.log(userInfo);
 
   return (
     <>
