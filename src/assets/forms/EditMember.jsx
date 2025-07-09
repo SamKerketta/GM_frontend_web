@@ -39,6 +39,8 @@ const EditMember = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const navigate = useNavigate();
+  const [fileBlob, setFileBlob] = useState(null);
+
   const [previewProfile, setPreviewProfile] = useState(
     data.memberDtls.photo_url
   );
@@ -94,6 +96,45 @@ const EditMember = () => {
 
   const startCamera = async () => {
     setStreaming(true);
+  };
+
+  const captureImage = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    const context = canvas.getContext("2d");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob((blob) => {
+      const file = new File([blob], "captured.jpg", { type: "image/jpeg" });
+      setCapturedImage(URL.createObjectURL(file));
+      setPreviewProfile(URL.createObjectURL(file));
+      setFileBlob(file);
+      formik.setFieldValue("photo", file);
+      setTimeout(() => {
+        console.log("After setFieldValue:", formik.values.photo);
+      }, 100); // wait a tick
+    }, "image/jpeg");
+
+    stopCamera();
+    console.log(formik.values);
+  };
+
+  const stopCamera = () => {
+    const stream = videoRef.current.srcObject;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+    setStreaming(false);
+  };
+
+  const removeImage = () => {
+    setCapturedImage(null);
+    setPreviewProfile(placeHolderImage);
+    setFileBlob(null);
   };
 
   //   Submit Member
@@ -160,12 +201,11 @@ const EditMember = () => {
                 <label
                   htmlFor="name"
                   className={`block mb-2 text-sm font-medium
-                                                ${
-                                                  formik.touched.name &&
-                                                  formik.errors.name
-                                                    ? "text-red-900"
-                                                    : "text-gray-900 dark:text-white"
-                                                }
+                                                ${formik.touched.name &&
+                      formik.errors.name
+                      ? "text-red-900"
+                      : "text-gray-900 dark:text-white"
+                    }
                                                     `}
                 >
                   Name
@@ -175,12 +215,11 @@ const EditMember = () => {
                   name="name"
                   id="name"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${
-                                                  formik.touched.name &&
-                                                  formik.errors.name
-                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                                }
+                                                ${formik.touched.name &&
+                      formik.errors.name
+                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    }
                                                     `}
                   placeholder="Member's Name"
                   onChange={formik.handleChange}
@@ -197,12 +236,11 @@ const EditMember = () => {
                 <label
                   htmlFor="email"
                   className={`block mb-2 text-sm font-medium
-                                                ${
-                                                  formik.touched.email &&
-                                                  formik.errors.email
-                                                    ? "text-red-900"
-                                                    : "text-gray-900 dark:text-white"
-                                                }
+                                                ${formik.touched.email &&
+                      formik.errors.email
+                      ? "text-red-900"
+                      : "text-gray-900 dark:text-white"
+                    }
                                                     `}
                 >
                   Email
@@ -213,12 +251,11 @@ const EditMember = () => {
                   id="email"
                   placeholder="example@gmail.com"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${
-                                                  formik.touched.email &&
-                                                  formik.errors.email
-                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                                }
+                                                ${formik.touched.email &&
+                      formik.errors.email
+                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    }
                                                     `}
                   onChange={formik.handleChange}
                   value={formik.values.email}
@@ -233,12 +270,11 @@ const EditMember = () => {
                 <label
                   htmlFor="phone"
                   className={`block mb-2 text-sm font-medium
-                                                ${
-                                                  formik.touched.phone &&
-                                                  formik.errors.phone
-                                                    ? "text-red-900"
-                                                    : "text-gray-900 dark:text-white"
-                                                }
+                                                ${formik.touched.phone &&
+                      formik.errors.phone
+                      ? "text-red-900"
+                      : "text-gray-900 dark:text-white"
+                    }
                                                     `}
                 >
                   Mobile
@@ -249,12 +285,11 @@ const EditMember = () => {
                   id="phone"
                   placeholder="0123456789"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${
-                                                  formik.touched.phone &&
-                                                  formik.errors.phone
-                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                                }
+                                                ${formik.touched.phone &&
+                      formik.errors.phone
+                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    }
                                                     `}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -271,12 +306,11 @@ const EditMember = () => {
                 <label
                   htmlFor="dob"
                   className={`block mb-2 text-sm font-medium
-                                                ${
-                                                  formik.touched.dob &&
-                                                  formik.errors.dob
-                                                    ? "text-red-900"
-                                                    : "text-gray-900 dark:text-white"
-                                                }
+                                                ${formik.touched.dob &&
+                      formik.errors.dob
+                      ? "text-red-900"
+                      : "text-gray-900 dark:text-white"
+                    }
                                                     `}
                 >
                   Date of Birth
@@ -286,12 +320,11 @@ const EditMember = () => {
                   name="dob"
                   id="dob"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${
-                                                  formik.touched.dob &&
-                                                  formik.errors.dob
-                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                                }
+                                                ${formik.touched.dob &&
+                      formik.errors.dob
+                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    }
                                                     `}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -308,12 +341,11 @@ const EditMember = () => {
                 <label
                   htmlFor="gender"
                   className={`block mb-2 text-sm font-medium
-                                                ${
-                                                  formik.touched.gender &&
-                                                  formik.errors.gender
-                                                    ? "text-red-900"
-                                                    : "text-gray-900 dark:text-white"
-                                                }
+                                                ${formik.touched.gender &&
+                      formik.errors.gender
+                      ? "text-red-900"
+                      : "text-gray-900 dark:text-white"
+                    }
                                                     `}
                 >
                   Gender
@@ -322,12 +354,11 @@ const EditMember = () => {
                   name="gender"
                   id="gender"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${
-                                                  formik.touched.gender &&
-                                                  formik.errors.gender
-                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                                }
+                                                ${formik.touched.gender &&
+                      formik.errors.gender
+                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    }
                                                     `}
                   onChange={formik.handleChange}
                   value={formik.values.gender}
@@ -348,12 +379,11 @@ const EditMember = () => {
                 <label
                   htmlFor="address"
                   className={`block mb-2 text-sm font-medium
-                                                ${
-                                                  formik.touched.address &&
-                                                  formik.errors.address
-                                                    ? "text-red-900"
-                                                    : "text-gray-900 dark:text-white"
-                                                }
+                                                ${formik.touched.address &&
+                      formik.errors.address
+                      ? "text-red-900"
+                      : "text-gray-900 dark:text-white"
+                    }
                                                     `}
                 >
                   Address
@@ -362,12 +392,11 @@ const EditMember = () => {
                   name="address"
                   id="address"
                   className={`border text-sm rounded-lg block w-full p-2.5
-                                                ${
-                                                  formik.touched.address &&
-                                                  formik.errors.address
-                                                    ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                                                    : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                                                }
+                                                ${formik.touched.address &&
+                      formik.errors.address
+                      ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                      : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                    }
                                                     `}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -385,11 +414,10 @@ const EditMember = () => {
                   <label
                     htmlFor="photo"
                     className={`flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500
-                     ${
-                       formik.touched.address && formik.errors.address
-                         ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
-                         : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                     }
+                     ${formik.touched.address && formik.errors.address
+                        ? "bg-red-50 border-red-500 placeholder-red-700 text-red-900 focus:ring-red-500 focus:border-red-500 dark:bg-red-600 dark:border-red-500 dark:placeholder-red-300 dark:text-white"
+                        : "bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                      }
                     `}
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -468,24 +496,13 @@ const EditMember = () => {
 
                     <div className="flex justify-center mt-4 gap-4">
                       <button
-                        onClick={() =>
-                          captureImage(
-                            videoRef,
-                            canvasRef,
-                            setCapturedImage,
-                            setPreviewProfile,
-                            setFileBlob,
-                            setStreaming
-                          )
-                        }
+                        onClick={captureImage}
                         className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                       >
                         Capture
                       </button>
                       <button
-                        onClick={() => {
-                          stopCamera(videoRef, setStreaming);
-                        }}
+                        onClick={stopCamera}
                         className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                       >
                         Cancel
