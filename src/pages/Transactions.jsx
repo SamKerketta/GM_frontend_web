@@ -1,11 +1,22 @@
-import { faCreditCard, faMoneyBill } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCreditCard,
+  faMoneyBill,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { faReceipt } from "@fortawesome/free-solid-svg-icons/faReceipt";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Tooltip } from "flowbite-react";
+import {
+  Button,
+  ButtonGroup,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  Tooltip,
+} from "flowbite-react";
 import { useEffect, useRef, useState } from "react";
 import DataTable from "react-data-table-component";
 import Invoice from "../components/Invoice";
-import { API_BASE_URL, CURRENT_DATE } from "../config/utilities";
+import { API_BASE_URL, AUTH_TOKEN, CURRENT_DATE } from "../config/utilities";
 import axios from "axios";
 import SuccessToast from "../components/SuccessToast";
 import ErrorToast from "../components/ErrorToast";
@@ -17,6 +28,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
+import { handleValidation } from "../Services/Utils";
 
 const Transactions = () => {
   const [loader, setLoader] = useState(false);
@@ -30,6 +42,9 @@ const Transactions = () => {
   const [filterEndDate, setFilterEndDate] = useState();
   const [filterRecipient, setFilterRecipient] = useState();
   const [totalAmount, setTotalAmount] = useState();
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteItems, setDeleteItems] = useState({ id: null, invoiceNo: "" });
+  const aDeletePlan = API_BASE_URL + "/delete-transaction";
 
   const formik = useFormik({
     initialValues: {
@@ -182,17 +197,40 @@ const Transactions = () => {
       button: true,
       cell: (row) => (
         <div className="flex gap-1 m-2">
-          {/* Info Button */}
-          <Button
-            type="button"
-            className="text-white bg-red-700 rounded-full hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 inline-flex items-center"
-            onClick={() => {
-              setTranId(row.transaction_id);
-              setOpenInvoice(true);
-            }}
-          >
-            <FontAwesomeIcon icon={faReceipt} title="Invoice" />
-          </Button>
+          <ButtonGroup>
+            <Button
+              className="p-4"
+              color="alternative"
+              onClick={() => {
+                setTranId(row.transaction_id);
+                setOpenInvoice(true);
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faReceipt}
+                title="Invoice"
+                className="text-blue-500"
+              />
+            </Button>
+
+            <Button
+              color="alternative"
+              onClick={() => {
+                setDeleteModal(true);
+                const selected = {
+                  id: row.transaction_id,
+                  invoiceNo: row.invoice_no,
+                };
+                setDeleteItems(selected);
+              }}
+            >
+              <FontAwesomeIcon
+                size="md"
+                icon={faTrash}
+                className="text-red-500"
+              />
+            </Button>
+          </ButtonGroup>
         </div>
       ),
     },
@@ -205,6 +243,44 @@ const Transactions = () => {
   const handlePerRowsChange = (newPerPage, page) => {
     setPerPage(newPerPage);
     fetchTransactions(page, newPerPage);
+  };
+
+  // Delete the Invoice
+  const submitDeletion = async () => {
+    setLoader(true);
+    try {
+      const response = await axios.post(
+        aDeletePlan,
+        {
+          tranId: deleteItems.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+          },
+        }
+      );
+      if (response.status == 200) {
+        if (response.data.status) {
+          SuccessToast.show(response.data.message);
+          fetchTransactions();
+        } else {
+          throw response.data.message;
+        }
+      }
+      if (response.status != 200) {
+        throw "Something Went Wrong";
+      }
+    } catch (error) {
+      if (error.isAxiosError) {
+        handleValidation(error.response.data.errors);
+      } else {
+        ErrorToast.show(error);
+      }
+    } finally {
+      setLoader(false);
+      setDeleteModal(false);
+    }
   };
 
   return (
@@ -351,6 +427,37 @@ const Transactions = () => {
         setOpenModal={setOpenInvoice}
         tranId={tranId}
       />
+
+      {/* Delete Modal */}
+      <Modal
+        show={deleteModal}
+        size="md"
+        onClose={() => setDeleteModal(false)}
+        popup
+      >
+        <ModalHeader />
+        <ModalBody>
+          <div className="text-center">
+            <FontAwesomeIcon icon={faTrash} className="text-red-600 text-2xl" />
+            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete Invoice{" "}
+              <b>{deleteItems.invoiceNo}</b> ?
+            </h3>
+            <div className="flex justify-center gap-4">
+              <Button color="red" onClick={() => submitDeletion()}>
+                Yes, I'm sure
+              </Button>
+              <Button
+                color="alternative"
+                disabled={loader}
+                onClick={() => setDeleteModal(false)}
+              >
+                No, cancel
+              </Button>
+            </div>
+          </div>
+        </ModalBody>
+      </Modal>
     </>
   );
 };
