@@ -217,16 +217,27 @@ const AddMember = ({
 
   // Fetch Plan list
   useEffect(() => {
-    axios.post(`${planListApi}`).then((response) => {
-      if (response.status === 200) {
-        const apiData = response.data;
-        if (apiData.status === true) {
-          setPlans(apiData.data);
+    axios
+      .post(
+        `${planListApi}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
-      } else {
-        ErrorToast.show(response.data.message);
-      }
-    });
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          const apiData = response.data;
+          if (apiData.status === true) {
+            setPlans(apiData.data);
+          }
+        } else {
+          ErrorToast.show(response.data.message);
+        }
+      });
   }, []);
 
   // Submit Members api call
