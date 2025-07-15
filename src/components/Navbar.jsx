@@ -26,6 +26,7 @@ const Navbar = () => {
       } else {
         SuccessToast.show(response.data.message);
         localStorage.removeItem("authToken");
+        localStorage.removeItem("userDetails");
         navigate("/login");
       }
     } catch (error) {

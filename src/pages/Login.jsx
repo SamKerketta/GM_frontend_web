@@ -16,7 +16,7 @@ const Login = () => {
 
   const checkAuth = () => {
     if (AUTH_TOKEN) {
-      // setRedirect(true);
+      setRedirect(true);
     }
   };
 

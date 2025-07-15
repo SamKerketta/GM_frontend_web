@@ -4,9 +4,10 @@ import { Navigate } from "react-router-dom";
 import { API_BASE_URL, AUTH_TOKEN } from "../config/utilities";
 import ErrorToast from "./ErrorToast";
 import axios from "axios";
+import PageLoader from "./PageLoader";
 
 const PrivateRoute = ({ children }) => {
-  const token = AUTH_TOKEN + "test";
+  const token = AUTH_TOKEN;
   const endpoint = API_BASE_URL + "/heartbeat";
   const [loader, setLoader] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // null = not checked yet
@@ -25,6 +26,8 @@ const PrivateRoute = ({ children }) => {
         }
       } catch (error) {
         if (error.response?.status === 401) {
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("userDetails");
           setIsAuthenticated(false);
         } else {
           ErrorToast.show(error);
@@ -43,7 +46,11 @@ const PrivateRoute = ({ children }) => {
   }, [token]);
 
   if (loader) {
-    return <div>Loading...</div>; // or your spinner
+    return (
+      <div>
+        <PageLoader />
+      </div>
+    ); // or your spinner
   }
 
   // console.log(isAuthenticated);

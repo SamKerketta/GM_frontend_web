@@ -62,16 +62,26 @@ const Members = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.post(`${planListApi}`).then((response) => {
-      if (response.status === 200) {
-        const apiData = response.data;
-        if (apiData.status === true) {
-          setPlans(apiData.data);
+    axios
+      .post(
+        `${planListApi}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+          },
         }
-      } else {
-        ErrorToast.show(response.data.message);
-      }
-    });
+      )
+      .then((response) => {
+        if (response.status === 200) {
+          const apiData = response.data;
+          if (apiData.status === true) {
+            setPlans(apiData.data);
+          }
+        } else {
+          ErrorToast.show(response.data.message);
+        }
+      });
   }, []);
 
   // use Effect
@@ -102,12 +112,20 @@ const Members = () => {
     setLoader(true);
     try {
       await axios
-        .post(`${memberListApi}`, {
-          page: page,
-          perPage: perPageSize,
-          name: searchMember,
-          dueStatus: searchDueStatus,
-        })
+        .post(
+          `${memberListApi}`,
+          {
+            page: page,
+            perPage: perPageSize,
+            name: searchMember,
+            dueStatus: searchDueStatus,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${AUTH_TOKEN}`,
+            },
+          }
+        )
         .then((response) => {
           if (response.status === 200) {
             const apiData = response.data;
@@ -133,9 +151,17 @@ const Members = () => {
     setNotifiedId(memberId);
     try {
       await axios
-        .post(`${API_BASE_URL}/send-whatsapp`, {
-          memberId: memberId,
-        })
+        .post(
+          `${API_BASE_URL}/send-whatsapp`,
+          {
+            memberId: memberId,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${AUTH_TOKEN}`,
+            },
+          }
+        )
         .then((response) => {
           if (response.data.status == false) {
             ErrorToast.show(response.data.message);

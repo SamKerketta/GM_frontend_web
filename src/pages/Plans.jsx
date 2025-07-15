@@ -443,7 +443,7 @@ const Plans = () => {
                     formik.handleChange)
                   }
                   startAdornment={
-                    <InputAdornment position="start">₹</InputAdornment>
+                    <InputAdornment position="start"></InputAdornment>
                   }
                   onBlur={formik.handleBlur}
                   error={
