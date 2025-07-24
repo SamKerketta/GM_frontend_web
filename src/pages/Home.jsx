@@ -84,16 +84,16 @@ const Home = () => {
         <WidgetLoader />
       ) : (
         <div className="grid grid-cols-12 gap-4">
-          <div className="col-span-4">
+          <div className="md:col-span-4 col-span-12">
             <AreaChart chartData={areaChartData} />
           </div>
-          <div className="col-span-4">
+          <div className="md:col-span-4 col-span-12">
             <PieChart chartData={pieChartData} />
           </div>
-          <div className="col-span-4">
+          <div className="md:col-span-4 col-span-12">
             <LineChart chartData={lineChartData} />
           </div>
-          <div className="col-span-6">
+          <div className="md:col-span-6 col-span-12">
             <BarChart chartData={barChartData} />
           </div>
         </div>

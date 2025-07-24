@@ -10,7 +10,7 @@ const Layout = ({ children }) => {
       <Sidebar />
       <Navbar />
       <div className="min-h-screen flex flex-col">
-        <main className="flex-1 mt-15 ml-[250px]">
+        <main className="mt-20 md:mt-12 flex-1 md:ml-[250px] px-2 md:px-0">
           <Outlet />
         </main>
         <Footer />
