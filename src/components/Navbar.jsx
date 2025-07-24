@@ -76,6 +76,7 @@ const Navbar = () => {
           </Dropdown>
         </div>
       </header>
+
     </>
   );
 };
