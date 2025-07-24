@@ -16,10 +16,10 @@ const PieChart = (props) => {
           breakpoint: 480,
           options: {
             chart: {
-              width: 200,
+              width: 300,
             },
             legend: {
-              position: "bottom",
+              position: "right",
             },
           },
         },
@@ -31,11 +31,16 @@ const PieChart = (props) => {
           },
         },
       },
+      legend: {
+        position: 'right',
+        floating: false,
+        offsetY: 10,
+      }
     },
   });
 
   return (
-    <div className="w-full max-w-3xl p-4 bg-white rounded-2xl shadow-md mx-auto">
+    <div className="w-full max-w-3xl p-4 bg-white rounded-2xl shadow-md mx-auto pb-20 md:pb-5">
       <h2 className="text-xl font-semibold mb-4">{props.chartData?.name}</h2>
       <ReactApexChart
         options={state.options}
