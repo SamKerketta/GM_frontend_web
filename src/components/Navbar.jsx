@@ -41,7 +41,7 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="w-full h-16 bg-white shadow-md flex px-6 fixed top-0 md:left-64 z-10 grid grid-cols-3 gap-4">
+      <header className="w-full h-16 bg-white shadow-md flex justify-between items-center px-4 sm:px-6 fixed top-0 left-0 z-10 md:left-64 md:grid md:grid-cols-3 md:gap-4">
         <h1 class="mb-4 sm:text-sm font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-3xl pt-3 col-span-2">
           <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">
             {GYM_NAME}
@@ -76,7 +76,6 @@ const Navbar = () => {
           </Dropdown>
         </div>
       </header>
-
     </>
   );
 };
