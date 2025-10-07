@@ -30,7 +30,9 @@ const PrivateRoute = ({ children }) => {
           localStorage.removeItem("userDetails");
           setIsAuthenticated(false);
         } else {
+          alert("Oops! Something went wrong");
           ErrorToast.show(error);
+          return false;
         }
       } finally {
         setLoader(false);
