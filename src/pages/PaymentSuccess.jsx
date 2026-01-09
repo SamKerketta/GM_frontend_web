@@ -13,7 +13,11 @@ const PaymentSuccess = () => {
     }, 1000);
 
     const redirectTimer = setTimeout(() => {
-      navigate("/");
+      navigate("/members", {
+        state: {
+          page: location.state.currentPage,
+        },
+      });
     }, 5000);
 
     return () => {

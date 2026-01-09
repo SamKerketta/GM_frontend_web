@@ -22,7 +22,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "flowbite-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import SuccessToast from "../components/SuccessToast";
 import { faCircleCheck } from "@fortawesome/free-solid-svg-icons/faCircleCheck";
 import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons/faMoneyCheckDollar";
@@ -41,10 +41,11 @@ const memberListApi = `${API_BASE_URL}/crud/member/list-member`;
  */
 
 const Members = () => {
+  const location = useLocation();
   const [membersList, setMembersList] = useState([]);
   const [loader, setLoader] = useState(false);
   const [totalRows, setTotalRows] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(location.state?.page || 1);
   const [perPage, setPerPage] = useState(10);
   const [reloadMembers, setreloadMembers] = useState(false);
   const planListApi = `${API_BASE_URL}/crud/plans/list`;
@@ -207,7 +208,7 @@ const Members = () => {
       if (response.status == 200) {
         if (response.data.status) {
           SuccessToast.show(response.data.message);
-          fetchMembers();
+          fetchMembers(currentPage);
           setDeleteModal(false);
         } else {
           throw response.data.message;
@@ -229,11 +230,12 @@ const Members = () => {
   };
 
   // Navigation to payment page
-  const navigateToPaymentPage = (memberId) => {
+  const navigateToPaymentPage = (memberId, currentPage) => {
     navigate("/member-payment", {
       state: {
         memberId: memberId,
         plans: plans,
+        currentPage: currentPage,
       },
     });
   };
@@ -250,7 +252,7 @@ const Members = () => {
   const columns = [
     {
       name: "#",
-      selector: (row, index) => index + 1,
+      selector: (row, index) => (currentPage - 1) * perPage + index + 1,
       sortable: true,
       width: "5%",
     },
@@ -362,7 +364,7 @@ const Members = () => {
 
             <Button
               color="alternative"
-              onClick={() => navigateToPaymentPage(row.id)}
+              onClick={() => navigateToPaymentPage(row.id, currentPage)}
               className="p-4 text-green-500 hover:text-green-400"
             >
               <FontAwesomeIcon size="md" icon={faMoneyCheckDollar} />
@@ -507,6 +509,7 @@ const Members = () => {
             pagination
             paginationServer
             paginationTotalRows={totalRows}
+            paginationDefaultPage={currentPage}
             onChangePage={handlePageChange}
             onChangeRowsPerPage={handlePerRowsChange}
             paginationRowsPerPageOptions={[10, 20, 50]}

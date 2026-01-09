@@ -21,6 +21,7 @@ const PaymentForm = () => {
   const location = useLocation();
   const plans = location.state.plans;
   const memberId = location.state.memberId;
+  const currentPage = location.state.currentPage;
   const [memberDtl, setMemberDtl] = useState([]);
   const [loader, setLoader] = useState(false);
   const [total, setTotal] = useState(0);
@@ -150,6 +151,7 @@ const PaymentForm = () => {
                   amount: payload.amountPaid,
                   paymentMethod: formik.values.paymentMethod,
                   recipient: formik.values.name,
+                  currentPage: currentPage,
                 },
               });
             }
